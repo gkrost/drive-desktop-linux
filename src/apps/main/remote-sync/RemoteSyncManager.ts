@@ -437,7 +437,7 @@ export class RemoteSyncManager {
     }
   }
 
-  private patchDriveFolderResponseItem = (payload: any): RemoteSyncedFolder => {
+  private patchDriveFolderResponseItem = (payload: Record<string, unknown>): RemoteSyncedFolder => {
     // We will assume that we received an status
     let status: RemoteSyncedFolder['status'] = payload.status;
 
@@ -460,7 +460,7 @@ export class RemoteSyncManager {
     };
   };
 
-  private patchDriveFileResponseItem = (payload: any): RemoteSyncedFile => {
+  private patchDriveFileResponseItem = (payload: Record<string, unknown>): RemoteSyncedFile => {
     return {
       ...payload,
       fileId: payload.fileId ?? '',

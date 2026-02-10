@@ -46,17 +46,6 @@ function setSyncRoot(pathname: string): void {
   configStore.set('lastSavedListing', '');
 }
 
-export function getRootVirtualDrive(): string {
-  const current = configStore.get('syncRoot');
-  ensureFolderExists(current);
-
-  if (current !== VIRTUAL_DRIVE_FOLDER) {
-    setupRootFolder();
-  }
-
-  return configStore.get('syncRoot');
-}
-
 export async function setupRootFolder(n = 0): Promise<void> {
   setSyncRoot(VIRTUAL_DRIVE_FOLDER);
   return;

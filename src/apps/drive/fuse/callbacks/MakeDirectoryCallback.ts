@@ -9,7 +9,8 @@ export class MakeDirectoryCallback extends NotifyFuseCallback {
     super('Make Directory');
   }
 
-  async execute(path: string, _mode: number) {
+  async execute(path: string, _mode: unknown) {
+    // Mode parameter is unused as this is a no-op callback
     if (path.startsWith('/.Trash')) {
       return this.right();
     }

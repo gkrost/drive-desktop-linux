@@ -12,7 +12,8 @@ export class ReleaseCallback extends NotifyFuseCallback {
     super('Release', { debug: false });
   }
 
-  async execute(path: string, _fd: number) {
+  async execute(path: string, _fd: unknown) {
+    // File descriptor parameter is unused as this is a no-op callback
     onRelease(path);
 
     try {
@@ -45,7 +46,7 @@ export class ReleaseCallback extends NotifyFuseCallback {
       await this.container.get(TemporalFileUploader).run(document.path.value);
       this.logDebugMessage('File has been uploaded');
       return this.right();
-    } catch (uploadError) {
+    } catch (uploadError: unknown) {
       logger.error({ msg: 'Upload failed:', error: uploadError });
       await this.container.get(TemporalFileDeleter).run(path);
       return this.left(new FuseIOError('Upload failed due to insufficient storage or network issues.'));

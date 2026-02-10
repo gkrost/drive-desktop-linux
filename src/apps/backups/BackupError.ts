@@ -1,4 +1,4 @@
-const BackupErrorCauses = [
+export const BackupErrorCauses = [
   'NOT_EXISTS',
   'NO_PERMISSION',
   'NO_INTERNET',

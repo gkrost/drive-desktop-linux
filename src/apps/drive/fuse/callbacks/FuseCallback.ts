@@ -31,7 +31,7 @@ export abstract class FuseCallback<T> {
     },
   ) {}
 
-  protected async executeAndCatch(params: any[]): Promise<Either<FuseError, T>> {
+  protected async executeAndCatch(params: unknown[]): Promise<Either<FuseError, T>> {
     // Ensure that an Either is always returned
 
     const stopwatch = new Stopwatch();
@@ -126,7 +126,7 @@ export abstract class FuseCallback<T> {
     callback(FuseCallback.OK, data);
   }
 
-  abstract execute(...params: any[]): Promise<Either<FuseError, T>>;
+  abstract execute(...params: unknown[]): Promise<Either<FuseError, T>>;
 }
 
 export abstract class NotifyFuseCallback extends FuseCallback<undefined> {

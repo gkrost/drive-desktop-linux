@@ -23,7 +23,7 @@ export class ReadCallback {
         logger.debug({ msg: '[ReadCallback] Read from cache:', path, length });
         return chunk.length;
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.debug({ msg: '[ReadCallback] File not in cache:', path });
     }
 
@@ -61,11 +61,11 @@ export class ReadCallback {
 
   async execute(
     path: string,
-    _fd: any,
+    _fd: unknown,
     buf: Buffer,
     len: number,
     pos: number,
-    cb: (code: number, params?: any) => void,
+    cb: (code: number, params?: unknown) => void,
   ) {
     try {
       const virtualFile = await this.container.get(FirstsFileSearcher).run({
@@ -91,7 +91,7 @@ export class ReadCallback {
 
       const bytesRead = await this.read(path, virtualFile.contentsId, buf, len, pos);
       cb(bytesRead);
-    } catch (err) {
+    } catch (err: unknown) {
       logger.error({ msg: '[ReadCallback] Error reading file:', error: err, path });
       cb(Fuse.EIO);
     }

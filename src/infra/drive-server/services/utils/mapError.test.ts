@@ -1,4 +1,4 @@
-import { AxiosError, isAxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 import { mapError } from './mapError';
 import { vi } from 'vitest';
 

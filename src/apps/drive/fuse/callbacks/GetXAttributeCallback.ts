@@ -16,7 +16,8 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
     return path === '/';
   }
 
-  async execute(path: string, _name: string, _size: string) {
+  async execute(path: string, _name: unknown, _size: unknown) {
+    // Name and size parameters are unused as this is a no-op callback
     if (this.isRootFolder(path)) {
       return this.left(new FuseError(FuseCodes.ENOSYS, 'Cannot get the status of root folder'));
     }
@@ -30,7 +31,7 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
 
       const buff = Buffer.from('on_remote');
       return this.right(buff);
-    } catch (err) {
+    } catch (err: unknown) {
       return this.left(new FuseNoSuchFileOrDirectoryError(path));
     }
   }

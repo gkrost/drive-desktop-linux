@@ -6,7 +6,8 @@ export class ChownCallback extends NotifyFuseCallback {
     super('Chown', { input: true, output: true });
   }
 
-  async execute(_path: string, _uid: number, _gid: number) {
+  async execute(_path: unknown, _uid: unknown, _gid: unknown) {
+    // Parameters are unused as this is a no-op callback
     return this.right();
   }
 }

@@ -29,8 +29,6 @@ export function trackOpen(path: string, flag: number): void {
     msg: '[OpenFlagsTracker] File opened:',
     path,
     flag,
-    isSystemOpen: isSystemOpen(flag),
-    isUserOpen: isUserOpen(flag),
   });
 }
 
@@ -67,7 +65,6 @@ export function shouldDownload(path: string): boolean {
     logger.debug({
       msg: '[OpenFlagsTracker] Download blocked - system open detected:',
       path,
-      flag,
     });
   }
 

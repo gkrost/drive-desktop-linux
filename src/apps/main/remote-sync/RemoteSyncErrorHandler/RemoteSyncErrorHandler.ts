@@ -20,7 +20,7 @@ export class RemoteSyncErrorHandler {
     error: RemoteSyncError,
     syncItemType: syncItemType,
     itemName: string,
-    itemCheckpoint?: Date,
+    _itemCheckpoint?: Date,
   ): void {
     switch (true) {
       case error instanceof RemoteSyncNetworkError:
