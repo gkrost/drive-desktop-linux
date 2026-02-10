@@ -1,0 +1,75 @@
+import { ContainerBuilder } from 'diod';
+import crypt from '../../../../context/shared/infrastructure/crypt';
+import { FileCreator } from '../../../../context/virtual-drive/files/application/create/FileCreator';
+import { FileTrasher } from '../../../../context/virtual-drive/files/application/trash/FileTrasher';
+import { FilePathUpdater } from '../../../../context/virtual-drive/files/application/move/FilePathUpdater';
+import { FilesByFolderPathSearcher } from '../../../../context/virtual-drive/files/application/search/FilesByFolderPathSearcher';
+import { FirstsFileSearcher } from '../../../../context/virtual-drive/files/application/search/FirstsFileSearcher';
+import { SingleFileMatchingSearcher } from '../../../../context/virtual-drive/files/application/search/SingleFileMatchingSearcher';
+import { CreateFileOnTemporalFileUploaded } from '../../../../context/virtual-drive/files/application/create/CreateFileOnTemporalFileUploaded';
+import { FileOverrider } from '../../../../context/virtual-drive/files/application/override/FileOverrider';
+import { FilesSearcherByPartialMatch } from '../../../../context/virtual-drive/files/application/search-all/FilesSearcherByPartialMatch';
+import { SyncFileMessenger } from '../../../../context/virtual-drive/files/domain/SyncFileMessenger';
+import { RemoteFileSystem } from '../../../../context/virtual-drive/files/domain/file-systems/RemoteFileSystem';
+import { SDKRemoteFileSystem } from '../../../../context/virtual-drive/files/infrastructure/SDKRemoteFileSystem';
+import { MainProcessSyncFileMessenger } from '../../../../context/virtual-drive/files/infrastructure/SyncFileMessengers/MainProcessSyncFileMessenger';
+import { DependencyInjectionUserProvider } from '../../../shared/dependency-injection/DependencyInjectionUserProvider';
+import { AuthorizedClients } from '../../../shared/HttpClient/Clients';
+import { FileRepository } from '../../../../context/virtual-drive/files/domain/FileRepository';
+import { InMemoryFileRepository } from '../../../../context/virtual-drive/files/infrastructure/InMemoryFileRepository';
+import { FileRepositorySynchronizer } from '../../../../context/virtual-drive/files/application/FileRepositorySynchronizer';
+import { RetrieveAllFiles } from '../../../../context/virtual-drive/files/application/RetrieveAllFiles';
+import { StorageFileDownloader } from '../../../../context/storage/StorageFiles/application/download/StorageFileDownloader/StorageFileDownloader';
+import { SingleFileMatchingFinder } from '../../../../context/virtual-drive/files/application/SingleFileMatchingFinder';
+import { FilesByPartialSearcher } from '../../../../context/virtual-drive/files/application/search/FilesByPartialSearcher';
+import { StorageFileService } from '../../../../context/storage/StorageFiles/StorageFileService';
+import { Environment } from '@internxt/inxt-js';
+
+export async function registerFilesServices(builder: ContainerBuilder): Promise<void> {
+  // Infra
+
+  builder.register(FileRepository).use(InMemoryFileRepository).asSingleton().private();
+
+  const user = DependencyInjectionUserProvider.get();
+
+  builder.register(SyncFileMessenger).use(MainProcessSyncFileMessenger);
+
+  builder
+    .register(RemoteFileSystem)
+    .useFactory((c) => new SDKRemoteFileSystem(c.get(AuthorizedClients), crypt, user.bucket));
+
+  // Services
+  builder.register(StorageFileService).useFactory((c) => {
+    const env = c.get(Environment);
+    return new StorageFileService(env, user.bucket);
+  });
+
+  builder.registerAndUse(StorageFileDownloader).private();
+
+  builder.registerAndUse(FileRepositorySynchronizer);
+
+  builder.registerAndUse(RetrieveAllFiles);
+
+  builder.registerAndUse(FirstsFileSearcher);
+
+  builder.registerAndUse(SingleFileMatchingSearcher);
+
+  builder.registerAndUse(FilesByFolderPathSearcher);
+
+  builder.registerAndUse(FilePathUpdater);
+
+  builder.registerAndUse(FileTrasher);
+
+  builder.registerAndUse(FileCreator);
+
+  builder.registerAndUse(FilesSearcherByPartialMatch);
+
+  builder.registerAndUse(FileOverrider);
+
+  builder.registerAndUse(SingleFileMatchingFinder);
+
+  builder.registerAndUse(FilesByPartialSearcher);
+
+  // Event Handlers
+  builder.registerAndUse(CreateFileOnTemporalFileUploaded).addTag('event-handler');
+}

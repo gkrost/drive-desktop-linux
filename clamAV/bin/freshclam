@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Freshclam placeholder - real binaries needed for actual antivirus functionality"
+exit 1

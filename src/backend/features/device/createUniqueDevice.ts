@@ -1,0 +1,44 @@
+import { Device } from '../../../apps/main/device/service';
+import os from 'os';
+import { logger } from '@internxt/drive-desktop-core/build/backend';
+import { tryCreateDevice } from './tryCreateDevice';
+import { Either, left, right } from '../../../context/shared/domain/Either';
+import { addUnknownDeviceIssue } from './addUnknownDeviceIssue';
+import { DeviceIdentifierDTO } from './device.types';
+/**
+ * Creates a new device with a unique name
+ * @returns Either containing the created device or an error if device creation fails after multiple attempts
+ * @param attempts The number of attempts to create a device with a unique name, defaults to 1000
+ */
+export async function createUniqueDevice(
+  deviceIdentifier: DeviceIdentifierDTO,
+  attempts = 1000,
+): Promise<Either<Error, Device>> {
+  const baseName = os.hostname();
+  const nameVariants = [baseName, ...Array.from({ length: attempts }, (_, i) => `${baseName} (${i + 1})`)];
+
+  // eslint-disable-next-line no-await-in-loop
+  for (const name of nameVariants) {
+    logger.debug({
+      tag: 'BACKUPS',
+      msg: `Trying to create device with name "${name}"`,
+    });
+    // eslint-disable-next-line no-await-in-loop
+    const tryCreateDeviceEither = await tryCreateDevice(name, deviceIdentifier);
+
+    if (tryCreateDeviceEither.isRight()) {
+      return right(tryCreateDeviceEither.getRight());
+    }
+    const error = tryCreateDeviceEither.getLeft();
+    if (error.message == 'Error creating device') {
+      return left(tryCreateDeviceEither.getLeft());
+    }
+  }
+  const finalError = logger.error({
+    tag: 'BACKUPS',
+    msg: 'Could not create device trying different names',
+  });
+
+  addUnknownDeviceIssue(finalError);
+  return left(finalError);
+}

@@ -1,0 +1,57 @@
+{
+	"files.associations": {
+		".eslintrc": "jsonc",
+		".prettierrc": "jsonc",
+		".eslintignore": "ignore"
+	},
+	"javascript.validate.enable": false,
+	"javascript.format.enable": false,
+	"typescript.format.enable": false,
+	"search.exclude": {
+		".git": true,
+		".eslintcache": true,
+		".erb/dll": true,
+		"release/{build,app/dist}": true,
+		"node_modules": true,
+		"npm-debug.log.*": true,
+		"test/**/__snapshots__": true,
+		"package-lock.json": true,
+		"*.{css,sass,scss}.d.ts": true
+	},
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"eslint.options": {
+		"overrideConfigFile": ".eslintrc.js"
+	},
+	"editor.formatOnPaste": true,
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit",
+		"source.fixAll.format": "explicit"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"cSpell.words": [
+		"avaliable"
+	],
+	"jest.jestCommandLine": "npm run jest --config=jest.config.main.js",
+	"jest.autoRun": "off",
+	"jest.rootPath": ".",
+	"jest.runMode": "on-demand",
+	"jest.testMatch": [
+		"<rootDir>/src/**/*.test.ts",
+		"<rootDir>/src/**/*.spec.ts"
+	],
+	"jest.disabledWorkspaceFolders": [],
+	"debug.node.autoAttach": "on",
+	"i18n-ally.localesPaths": [
+		"src/apps/renderer/messages",
+		"src/apps/antivirus/ipc/messages",
+		"src/apps/renderer/localize/locales",
+		"src/backend/features/payments/ipc/messages"
+	]
+}

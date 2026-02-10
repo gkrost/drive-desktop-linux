@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "declaration": true,
+    "declarationMap": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "pretty": true,
+    "sourceMap": true,
+    "rootDir": ".",
+    "baseUrl": "./",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "types": [
+      "vitest/globals",
+      "node"
+    ]
+  },
+  "exclude": [
+    "release/build",
+    "build",
+    "release/app/dist",
+    "dist",
+    ".erb/dll",
+    "src/workers/backups/process.ts",
+    "src/workers/backups",
+    "src/workers/filesystems",
+    "__mock__"
+  ],
+  "include": [
+    "src/**/*",
+    "src/types/**/*",
+    "tests/**/*",
+    "*.d.ts",
+    "assets/**/*.d.ts",
+    "vitest.config.*.ts",
+    "vitest.setup.*.ts"
+  ]
+}
