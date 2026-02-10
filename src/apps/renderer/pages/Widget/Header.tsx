@@ -138,7 +138,9 @@ export default function Header() {
   const ItemsSection = () => (
     <div className="flex shrink-0 items-center space-x-0.5 text-gray-80">
       {process.env.platform === 'darwin' && <div className="h-0 w-0" tabIndex={0} ref={dummyRef} />}
-      <HeaderItemWrapper onClick={() => handleOpenURL('https://drive.internxt.com')}> // HARDCODED: internxt main web app
+      <HeaderItemWrapper onClick={() => handleOpenURL('https://drive.internxt.com')}>
+        {' '}
+        // HARDCODED: internxt main web app
         <Globe size={22} />
       </HeaderItemWrapper>
       <HeaderItemWrapper

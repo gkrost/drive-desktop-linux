@@ -25,7 +25,9 @@ export default function AppInfo() {
         <button
           type="button"
           className="text-primary active:text-primary-dark"
-          onClick={() => handleOpenURL('https://internxt.com/drive')}> // HARDCODED: internxt drive page
+          onClick={() => handleOpenURL('https://internxt.com/drive')}>
+          {' '}
+          // HARDCODED: internxt drive page
           {translate('settings.general.app-info.more')}
         </button>
       </div>

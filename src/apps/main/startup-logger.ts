@@ -112,9 +112,7 @@ export function logPreStartupConfig(): void {
   writeToLogFile(content);
 }
 
-export function logPostStartupConfig(configStore: {
-  get: (key: string) => unknown;
-}): void {
+export function logPostStartupConfig(configStore: { get: (key: string) => unknown }): void {
   const syncRoot = configStore.get('syncRoot') as string | undefined;
   const preferedTheme = configStore.get('preferedTheme') as string | undefined;
   const preferedLanguage = configStore.get('preferedLanguage') as string | undefined;
@@ -133,9 +131,8 @@ export function logPostStartupConfig(configStore: {
   const storageMigrationDate = configStore.get('storageMigrationDate') as string | undefined;
   const fixDeploymentDate = configStore.get('fixDeploymentDate') as string | undefined;
 
-  const userEmail = userData && typeof userData === 'object' && 'email' in userData
-    ? String(userData.email)
-    : undefined;
+  const userEmail =
+    userData && typeof userData === 'object' && 'email' in userData ? String(userData.email) : undefined;
 
   const lines: string[] = [
     SEPARATOR,
