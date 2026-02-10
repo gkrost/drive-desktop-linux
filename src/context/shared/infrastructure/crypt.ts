@@ -25,9 +25,9 @@ function decryptName(cipherText: string, salt?: string, encryptVersion?: string)
     throw logger.error({
       msg: 'AES Decrypt failed',
       cipher: cipherText,
-      salt: salt,
+      salt,
       message: (e as Error).message,
-      encryptVersion: encryptVersion,
+      encryptVersion,
       stack: (e as Error).stack,
     });
   }

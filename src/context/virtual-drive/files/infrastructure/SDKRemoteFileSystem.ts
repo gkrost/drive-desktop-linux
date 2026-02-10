@@ -37,7 +37,7 @@ export class SDKRemoteFileSystem implements RemoteFileSystem {
       encryptVersion: EncryptionVersion.Aes03,
       folderUuid: dataToPersists.folderUuid,
       size: dataToPersists.size.value,
-      plainName: plainName,
+      plainName,
       type: dataToPersists.path.extension(),
     };
 

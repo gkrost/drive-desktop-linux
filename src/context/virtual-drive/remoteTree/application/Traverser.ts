@@ -32,7 +32,7 @@ export class Traverser {
 
   private createRootFolder(id: number, rootFolderUuid: string): Folder {
     return Folder.from({
-      id: id,
+      id,
       uuid: rootFolderUuid,
       parentId: null,
       updatedAt: new Date().toISOString(),
