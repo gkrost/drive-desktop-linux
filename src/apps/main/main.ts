@@ -12,6 +12,9 @@ import { setupElectronLog } from '@internxt/drive-desktop-core/build/backend';
 setupElectronLog({
   logsPath: PATHS.LOGS,
 });
+import sourceMapSupport from 'source-map-support';
+import electronDebug from 'electron-debug';
+
 import './virtual-root-folder/handlers';
 import './auto-launch/handlers';
 import './auth/handlers';
@@ -108,14 +111,11 @@ if (process.platform === 'darwin') {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
 
 if (process.env.NODE_ENV === 'development') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('electron-debug')({ showDevTools: false });
+  electronDebug({ showDevTools: false });
 }
 
 app

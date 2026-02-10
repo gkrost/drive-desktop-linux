@@ -1,6 +1,9 @@
 import dayjs from 'dayjs';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import en from './locales/en.json';
+import es from './locales/es.json';
+import fr from './locales/fr.json';
 import DayJsLocales from '../../shared/Locale/DayJsLocales';
 import { DEFAULT_LANGUAGE, Language, isLanguage } from '../../shared/Locale/Language';
 import { getConfigKey } from '../utils/query';
@@ -48,13 +51,13 @@ i18next
   .init({
     resources: {
       en: {
-        translation: require('./locales/en.json'),
+        translation: en,
       },
       es: {
-        translation: require('./locales/es.json'),
+        translation: es,
       },
       fr: {
-        translation: require('./locales/fr.json'),
+        translation: fr,
       },
     },
     debug: true,

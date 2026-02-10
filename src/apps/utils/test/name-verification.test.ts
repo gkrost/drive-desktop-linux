@@ -1,8 +1,6 @@
 import { fileNameIsValid } from '../name-verification';
 import sensibleFiles from './sensible-files.json';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path');
+import path from 'path';
 
 describe('name verifiaction test', () => {
   const INVALID = false;
@@ -102,11 +100,11 @@ describe('name verifiaction test', () => {
 
     beforeAll(() => {
       originalPathSeparation = path.sep as string;
-      path.sep = '\\';
+      (path.sep as string) = '\\';
     });
 
     afterAll(() => {
-      path.sep = originalPathSeparation;
+      (path.sep as string) = originalPathSeparation;
     });
 
     it('startup folder is not valid', () => {

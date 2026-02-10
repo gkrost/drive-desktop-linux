@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import type { IElectronAPI } from './src/apps/main/interface';
@@ -16,8 +17,8 @@ vi.mock('@internxt/drive-desktop-core/build/backend', () => ({
 type DeepMock<T> = T extends (...args: any[]) => any
   ? ReturnType<typeof vi.fn>
   : T extends object
-  ? { [K in keyof T]: DeepMock<T[K]> }
-  : T;
+    ? { [K in keyof T]: DeepMock<T[K]> }
+    : T;
 
 function createTypedMock<T extends object>(): DeepMock<T> {
   return new Proxy({} as any, {
@@ -96,11 +97,7 @@ vi.mock('@headlessui/react', () => {
   };
 
   const Menu = function (props: any) {
-    return React.createElement(
-      props.as || 'div',
-      { className: props.className },
-      props.children
-    );
+    return React.createElement(props.as || 'div', { className: props.className }, props.children);
   };
 
   Menu.Button = function (props: any) {

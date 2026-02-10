@@ -75,7 +75,9 @@ export class NetworkFacade {
         );
 
         fileStream = buildProgressStream(decryptedStream, (readBytes) => {
-          options && options.downloadingCallback && options.downloadingCallback(fileSize, readBytes);
+          if (options?.downloadingCallback) {
+             options.downloadingCallback(fileSize, readBytes);
+           }
         });
       },
       (options?.token && { token: options.token }) || undefined,
