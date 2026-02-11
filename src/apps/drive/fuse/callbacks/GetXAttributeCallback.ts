@@ -1,4 +1,4 @@
-import { FuseCallback } from './FuseCallback';
+import { FuseCallback, CallbackWithData } from './FuseCallback';
 import { VirtualDrive } from '../../virtual-drive/VirtualDrive';
 import { FuseNoSuchFileOrDirectoryError } from './FuseErrors';
 import Fuse from '@gcas/fuse';
@@ -27,8 +27,6 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
   async execute(path: string, name: unknown, _size: unknown) {
     const attrName = String(name);
 
-    // Return ENODATA for ACL attributes on root folder to avoid native assertion failures
-    // These attributes are system-level and not relevant for virtual drive
     if (this.isRootFolder(path) && this.isSystemAclAttribute(attrName)) {
       return this.left(new FuseErrorWithCode(GetXAttributeCallback.ENODATA, `No data available for ${attrName}`));
     }
@@ -46,6 +44,30 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
     } catch (err: unknown) {
       return this.left(new FuseNoSuchFileOrDirectoryError(path));
     }
+  }
+
+  async handle(...params: unknown[]): Promise<void> {
+    const callback = params.pop() as CallbackWithData<Buffer>;
+
+    if (this.debug.input) {
+      logger.debug({ msg: `${this.name}: `, params });
+    }
+
+    const result = await this.executeAndCatch(params);
+
+    if (result.isLeft()) {
+      const error = result.getLeft();
+      // Always pass a valid buffer to prevent native assertion failures
+      // when returning error codes from getxattr callbacks
+      const emptyBuffer = Buffer.alloc(1);
+      if (this.debug.output) {
+        logger.debug({ msg: `${this.name}`, error });
+      }
+      return callback(error.code, emptyBuffer);
+    }
+
+    const data = result.getRight();
+    callback(FuseCallback.OK, data);
   }
 }
 
