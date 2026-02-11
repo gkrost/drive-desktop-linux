@@ -39,6 +39,7 @@ describe('getUsageAndLimit', () => {
     expect(result.data).toBeUndefined();
     expect(mockLogger.error).toHaveBeenCalledWith({
       msg: 'getUsageAndLimit request was not succesfull',
+      error: 'Usage fetch failed',
     });
   });
 
@@ -54,24 +55,25 @@ describe('getUsageAndLimit', () => {
     expect(result.data).toBeUndefined();
     expect(mockLogger.error).toHaveBeenCalledWith({
       msg: 'getUsageAndLimit request was not succesfull',
+      error: 'Limit fetch failed',
     });
   });
 
   it('should return error when both getUsage and getLimit return errors', async () => {
     const usageError = new Error('Usage fetch failed');
     const limitError = new Error('Limit fetch failed');
-    const loggedError = new Error('Both requests failed');
 
     mockGetUsage.mockResolvedValue(left(usageError));
     mockGetLimit.mockResolvedValue(left(limitError));
-    mockLogger.error.mockReturnValue(loggedError);
+    mockLogger.error.mockReturnValue(usageError);
 
     const result = await getUsageAndLimit();
 
-    expect(result.error).toBe(loggedError);
+    expect(result.error).toBe(usageError);
     expect(result.data).toBeUndefined();
     expect(mockLogger.error).toHaveBeenCalledWith({
       msg: 'getUsageAndLimit request was not succesfull',
+      error: 'Usage fetch failed',
     });
   });
 
