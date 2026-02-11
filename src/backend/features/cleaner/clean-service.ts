@@ -61,8 +61,6 @@ export async function startCleanup(viewModel: CleanerViewModel): Promise<void> {
 
   // Initialize cleanup state
   currentAbortController = new AbortController();
-  deletedFilesCount = 0;
-  totalSpaceGained = 0;
 
   // Get all items to delete
   const itemsToDelete = getAllItemsToDelete(viewModel, storedCleanerReport);
@@ -84,18 +82,19 @@ export async function startCleanup(viewModel: CleanerViewModel): Promise<void> {
     cleaningCompleted: false,
   });
 
-  // Process each file
-  // eslint-disable-next-line no-await-in-loop
-  for (let i = 0; i < itemsToDelete.length; i++) {
-    // Check if cleanup was aborted
-    if (currentAbortController.signal.aborted) {
-      logger.debug({ msg: 'Cleanup process was aborted' });
-      break;
-    }
+  // Process all files in parallel
+  const deletionResults = await Promise.all(
+    itemsToDelete.map((item, index) => deleteFileSafely(item.fullPath)),
+  );
 
-    const item = itemsToDelete[i];
-    // eslint-disable-next-line no-await-in-loop
-    const result = await deleteFileSafely(item.fullPath);
+  // Calculate totals using module-level counters
+  deletedFilesCount = 0;
+  totalSpaceGained = 0;
+  skippedFilesCount = 0;
+
+  deletionResults.forEach((result, index) => {
+    const item = itemsToDelete[index];
+    const progress = Math.round(((index + 1) / itemsToDelete.length) * 100);
 
     if (result.success) {
       deletedFilesCount++;
@@ -104,8 +103,7 @@ export async function startCleanup(viewModel: CleanerViewModel): Promise<void> {
       skippedFilesCount++;
     }
 
-    // 2. Emit progress after each deletion attempt
-    const progress = Math.round(((i + 1) / totalFilesToDelete) * 100);
+    // Emit progress after each deletion
     emitProgress({
       currentCleaningPath: item.fileName,
       progress,
@@ -115,7 +113,8 @@ export async function startCleanup(viewModel: CleanerViewModel): Promise<void> {
       cleaning: true,
       cleaningCompleted: false,
     });
-  }
+  });
+  });
 
   // 3. Emit completion - at finish (always completed: true)
   emitProgress({

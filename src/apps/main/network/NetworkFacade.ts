@@ -52,21 +52,22 @@ export class NetworkFacade {
       this.cryptoLib,
       Buffer.from,
       async (downloadables) => {
-        // eslint-disable-next-line no-await-in-loop
-        for (const downloadable of downloadables) {
+        const fetchPromises = downloadables.map(async (downloadable) => {
           if (options?.abortController?.signal.aborted) {
             throw new Error('Download aborted');
           }
 
-          // eslint-disable-next-line no-await-in-loop
           const encryptedContentStream = await fetch(downloadable.url, {
             signal: options?.abortController?.signal,
           });
           if (!encryptedContentStream.body) {
             throw new Error('No content received');
           }
-          encryptedContentStreams.push(convertToReadableStream(encryptedContentStream.body as Readable));
-        }
+          return convertToReadableStream(encryptedContentStream.body as Readable);
+        });
+
+        const streams = await Promise.all(fetchPromises);
+        encryptedContentStreams.push(...streams);
       },
       async (_, key, iv, fileSize) => {
         const decryptedStream = getDecryptedStream(
