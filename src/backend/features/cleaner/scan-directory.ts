@@ -33,11 +33,11 @@ export async function scanDirectory({
     const dirents = await fs.readdir(dirPath, { withFileTypes: true });
     const items: CleanableItem[] = [];
 
-    // eslint-disable-next-line no-await-in-loop
+     
     for (const dirent of dirents) {
       const fullPath = path.join(dirPath, dirent.name);
       if (!isInternxtRelated(fullPath)) {
-        // eslint-disable-next-line no-await-in-loop
+         
         const cleanableItems = await processDirent({
           entry: dirent,
           fullPath,

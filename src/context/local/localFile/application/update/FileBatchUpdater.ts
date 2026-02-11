@@ -20,7 +20,7 @@ export class FileBatchUpdater {
     signal: AbortSignal,
   ): Promise<void> {
     for (const localFile of batch) {
-      // eslint-disable-next-line no-await-in-loop
+       
       const upload = await this.uploader.upload(localFile.path, localFile.size, signal);
 
       if (upload.isLeft()) {
@@ -37,7 +37,7 @@ export class FileBatchUpdater {
         throw new Error(`Expected file, found folder on ${file.path}`);
       }
 
-      // eslint-disable-next-line no-await-in-loop
+       
       await this.simpleFileOverrider.run(file, contentsId, localFile.size);
     }
   }

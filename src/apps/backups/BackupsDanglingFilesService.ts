@@ -16,7 +16,7 @@ export class BackupsDanglingFilesService {
     });
     const filesToResync = new Map<LocalFile, File>();
 
-    // eslint-disable-next-line no-await-in-loop
+     
     for (const [localFile, remoteFile] of danglingFiles) {
       try {
         logger.debug({
@@ -24,7 +24,7 @@ export class BackupsDanglingFilesService {
           msg: '[BACKUP DANGLING FILE] Checking file',
           contentsId: remoteFile.contentsId,
         });
-        // eslint-disable-next-line no-await-in-loop
+         
         const resultEither = await this.storageFileService.isFileDownloadable(remoteFile.contentsId);
         if (resultEither.isRight()) {
           const isFileDownloadable = resultEither.getRight();

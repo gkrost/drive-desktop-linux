@@ -24,19 +24,19 @@ export class FolderPlaceholderUpdater {
 
     const children = await fs.readdir(newWin32AbsolutePath);
 
-    // eslint-disable-next-line no-await-in-loop
+     
     for (const child of children) {
       const childWin32AbsolutePath = path.win32.join(newWin32AbsolutePath, child);
       const newChildWin32AbsolutePath = path.win32.join(newWin32AbsolutePath, child);
 
-      // eslint-disable-next-line no-await-in-loop
+       
       const stat = await fs.stat(childWin32AbsolutePath);
 
       if (stat.isDirectory()) {
-        // eslint-disable-next-line no-await-in-loop
+         
         await this.renameFolderRecursive(childWin32AbsolutePath, newChildWin32AbsolutePath);
       } else {
-        // eslint-disable-next-line no-await-in-loop
+         
         await fs.rename(childWin32AbsolutePath, newChildWin32AbsolutePath);
       }
     }

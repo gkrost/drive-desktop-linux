@@ -30,7 +30,7 @@ export class SynchronizeOfflineModifications {
 
     const events = await this.eventsRepository.search(uuid);
 
-    // eslint-disable-next-line no-await-in-loop
+     
     for (const event of events) {
       if (event.eventName !== FolderRenamedDomainEvent.EVENT_NAME) {
         continue;
@@ -50,7 +50,7 @@ export class SynchronizeOfflineModifications {
 
       try {
         logger.debug({ msg: 'Updating the folder with path:', path: offlineFolder.path });
-        // eslint-disable-next-line no-await-in-loop
+         
         await this.renamer.run(folder, new FolderPath(offlineFolder.path));
         logger.debug({ msg: 'Folder updated with the path:', path: offlineFolder.path });
       } catch (error: unknown) {

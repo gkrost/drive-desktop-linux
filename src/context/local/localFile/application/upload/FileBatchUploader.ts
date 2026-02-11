@@ -27,7 +27,7 @@ export class FileBatchUploader {
 
       let uploadEither;
       try {
-        // eslint-disable-next-line no-await-in-loop
+         
         uploadEither = await this.localHandler.upload(localFile.path, localFile.size, signal);
       } catch (error) {
         logger.error({ msg: '[UPLOAD ERROR]', error });
@@ -47,12 +47,12 @@ export class FileBatchUploader {
 
       const contentsId = uploadEither.getRight();
 
-      // eslint-disable-next-line no-await-in-loop
+       
       const either = await this.creator.run(contentsId, localFile.path, localFile.size, parent.id, parent.uuid);
 
       if (either.isLeft()) {
         logger.debug({ msg: '[FILE CREATION FAILED]', error: either.getLeft() });
-        // eslint-disable-next-line no-await-in-loop
+         
         await this.localHandler.delete(contentsId);
         const error = either.getLeft();
 

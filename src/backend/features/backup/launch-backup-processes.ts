@@ -26,7 +26,7 @@ export async function launchBackupProcesses(
       break;
     }
 
-    // eslint-disable-next-line no-await-in-loop
+     
     const result = await backupService.runWithRetry(backupInfo, signal, tracker);
     if (result.isLeft()) {
       const error = result.getLeft();

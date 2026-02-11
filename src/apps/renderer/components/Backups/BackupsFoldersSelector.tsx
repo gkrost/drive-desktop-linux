@@ -41,7 +41,7 @@ export const BackupsFoldersSelector: React.FC<BackupsFoldersSelectorProps> = (pr
       const folder = await window.electron.getFolderPath();
 
       if (!folder?.path) {
-        // eslint-disable-next-line no-console
+         
         return console.warn('No folder selected by the user');
       }
 

@@ -14,11 +14,11 @@ export async function createOrUpdateFileByBatch({ files }: Props) {
   if (files.length === 0) return { data: [] };
 
   try {
-    // eslint-disable-next-line no-await-in-loop
+     
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const chunk = files.slice(i, i + BATCH_SIZE);
 
-      // eslint-disable-next-line no-await-in-loop
+       
       await fileRepository.upsert(chunk, {
         conflictPaths: ['uuid'],
       });

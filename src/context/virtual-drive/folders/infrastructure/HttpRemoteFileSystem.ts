@@ -31,7 +31,7 @@ export class HttpRemoteFileSystem implements RemoteFileSystem {
     do {
       const offset = page * HttpRemoteFileSystem.PAGE_SIZE;
 
-      // eslint-disable-next-line no-await-in-loop
+       
       const result = await this.trashClient.get(
         `${process.env.NEW_DRIVE_URL}/folders/${parentId.value}/folders?offset=${offset}&limit=${HttpRemoteFileSystem.PAGE_SIZE}`,
       );

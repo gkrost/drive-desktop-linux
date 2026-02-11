@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 import Fuse from 'fuse-native';
 
 export enum FuseCodes {

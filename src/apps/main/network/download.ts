@@ -63,7 +63,7 @@ export async function downloadFolderAsZip(
 
     const { files, children: folders } = currentFolder.data;
 
-    // eslint-disable-next-line no-await-in-loop
+     
     for (const file of files) {
       if (abortController?.signal.aborted) {
         throw new Error('Download cancelled by user');
@@ -89,7 +89,7 @@ export async function downloadFolderAsZip(
         },
       });
 
-      // eslint-disable-next-line no-await-in-loop
+       
       zip.addFile(folderPath + '/' + displayFilename, await fileStreamPromise);
     }
 
@@ -298,7 +298,7 @@ function joinReadableBinaryStreams(streams: ReadableStream<Uint8Array>[]): Reada
       let done = false;
 
       while (!done && keepReading) {
-        // eslint-disable-next-line no-await-in-loop
+         
         const status = await reader.read();
 
         if (!status.done) {

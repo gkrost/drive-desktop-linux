@@ -14,11 +14,11 @@ export async function createOrUpdateFolderByBatch({ folders }: Props) {
   if (folders.length === 0) return { data: [] };
 
   try {
-    // eslint-disable-next-line no-await-in-loop
+     
     for (let i = 0; i < folders.length; i += BATCH_SIZE) {
       const chunk = folders.slice(i, i + BATCH_SIZE);
 
-      // eslint-disable-next-line no-await-in-loop
+       
       await folderRepository.upsert(chunk, {
         conflictPaths: ['uuid'],
       });

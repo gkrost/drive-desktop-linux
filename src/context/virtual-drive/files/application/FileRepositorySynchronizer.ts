@@ -26,14 +26,14 @@ export class FileRepositorySynchronizer {
         msg: `[DANGLING FILE] Checking ${files.length} files for corruption.`,
       });
 
-      // eslint-disable-next-line no-await-in-loop
+       
       for (const file of files) {
         try {
           if (file.size === 0) {
             continue;
           }
 
-          // eslint-disable-next-line no-await-in-loop
+           
           const resultEither = await this.storageFileService.isFileDownloadable(file.contentsId);
           if (resultEither.isRight()) {
             const isFileDownloadable = resultEither.getRight();
@@ -41,7 +41,7 @@ export class FileRepositorySynchronizer {
               logger.warn({
                 msg: `[DANGLING FILE] File ${file.contentsId} is not downloadable, deleting...`,
               });
-              // eslint-disable-next-line no-await-in-loop
+               
               await this.remoteFileSystem.hardDelete(file.contentsId);
             }
           } else {

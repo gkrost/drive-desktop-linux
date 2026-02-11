@@ -116,7 +116,7 @@ export async function getMirrors(
   };
 
   do {
-    // eslint-disable-next-line no-await-in-loop
+     
     results = (await getFileMirrors(networkApiUrl, bucketId, fileId, limit, mirrors.length, [], requestConfig))
       .filter((m) => !m.parity)
       .sort((mA, mB) => mA.index - mB.index);
@@ -126,14 +126,14 @@ export async function getMirrors(
     });
   } while (results.length > 0);
 
-  // eslint-disable-next-line no-await-in-loop
+   
   for (const mirror of mirrors) {
     const farmerIsOk = isFarmerOk(mirror.farmer);
 
     if (farmerIsOk) {
       mirror.farmer.address = mirror.farmer.address.trim();
     } else {
-      // eslint-disable-next-line no-await-in-loop
+       
       mirrors[mirror.index] = await replaceMirror(networkApiUrl, bucketId, fileId, mirror.index, [], requestConfig);
 
       if (!isFarmerOk(mirrors[mirror.index].farmer)) {
@@ -157,9 +157,9 @@ async function replaceMirror(
   excludeNodes: string[] = [],
   opts?: AxiosRequestConfig,
 ): Promise<Mirror> {
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
-    // eslint-disable-next-line no-await-in-loop
+     
     const [newMirror] = await getFileMirrors(networkApiUrl, bucketId, fileId, 1, pointerIndex, excludeNodes, opts);
 
     const farmer = newMirror.farmer;

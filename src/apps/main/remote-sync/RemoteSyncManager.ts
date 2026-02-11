@@ -308,15 +308,15 @@ export class RemoteSyncManager {
     let hasMore = true;
     let retryCount = 0;
 
-    // eslint-disable-next-line no-await-in-loop
+     
     while (hasMore && retryCount < syncConfig.maxRetries) {
       let lastFileSynced = null;
 
       try {
-        // eslint-disable-next-line no-await-in-loop
+         
         const { hasMore: moreAvailable, result } = await this.fetchFilesFromRemote(fileCheckPoint);
 
-        // eslint-disable-next-line no-await-in-loop
+         
         await createOrUpdateFileByBatch({ files: result });
         this.totalFilesSynced += result.length;
         lastFileSynced = result.length > 0 ? result[result.length - 1] : null;
@@ -359,7 +359,7 @@ export class RemoteSyncManager {
           return;
         }
 
-        // eslint-disable-next-line no-await-in-loop
+         
         await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
       }
     }
@@ -393,15 +393,15 @@ export class RemoteSyncManager {
     let hasMore = true;
     let retryCount = 0;
 
-    // eslint-disable-next-line no-await-in-loop
+     
     while (hasMore && retryCount < syncConfig.maxRetries) {
       let lastFolderSynced = null;
 
       try {
-        // eslint-disable-next-line no-await-in-loop
+         
         const { hasMore: moreAvailable, result } = await this.fetchFoldersFromRemote(folderCheckPoint);
 
-        // eslint-disable-next-line no-await-in-loop
+         
         await createOrUpdateFolderByBatch({ folders: result });
         this.totalFoldersSynced += result.length;
         lastFolderSynced = result.length > 0 ? result[result.length - 1] : null;
@@ -446,7 +446,7 @@ export class RemoteSyncManager {
         }
 
         // Brief delay before retry to avoid hammering the server
-        // eslint-disable-next-line no-await-in-loop
+         
         await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
       }
     }

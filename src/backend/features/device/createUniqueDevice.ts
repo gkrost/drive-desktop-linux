@@ -17,13 +17,13 @@ export async function createUniqueDevice(
   const baseName = os.hostname();
   const nameVariants = [baseName, ...Array.from({ length: attempts }, (_, i) => `${baseName} (${i + 1})`)];
 
-  // eslint-disable-next-line no-await-in-loop
+   
   for (const name of nameVariants) {
     logger.debug({
       tag: 'BACKUPS',
       msg: `Trying to create device with name "${name}"`,
     });
-    // eslint-disable-next-line no-await-in-loop
+     
     const tryCreateDeviceEither = await tryCreateDevice(name, deviceIdentifier);
 
     if (tryCreateDeviceEither.isRight()) {
