@@ -7,9 +7,42 @@ import 'regenerator-runtime/runtime';
 import 'dotenv/config';
 // ***** APP BOOTSTRAPPING ****************************************************** //
 import { PATHS } from '../../core/electron/paths';
-import { setupElectronLog } from '@internxt/drive-desktop-core/build/backend';
+import electronLog from 'electron-log';
+import path from 'node:path';
+import { logFormatter } from '@internxt/drive-desktop-core/build/backend/core/logger/log-formatter';
 
-setupElectronLog({
+function setupElectronLogFixed({ logsPath }: { logsPath: string }) {
+  electronLog.initialize();
+
+  const defaultLogs = path.join(logsPath, 'drive.log');
+  const importantLogs = path.join(logsPath, 'drive-important.log');
+
+  // Force file transport initialization by accessing it
+  // In electron-log v5, transports are created lazily
+  const fileTransport = electronLog.transports.file;
+  if (fileTransport) {
+    fileTransport.resolvePathFn = (_, message) => {
+      if (message?.level === 'info') {
+        return importantLogs;
+      } else {
+        return defaultLogs;
+      }
+    };
+
+    fileTransport.maxSize = 1024 * 1024 * 1024;
+    fileTransport.format = logFormatter;
+    fileTransport.level = 'debug';
+  }
+
+  electronLog.transports.console.format = (message) => [...message.data];
+  electronLog.transports.console.writeFn = ({ message }) => {
+    if (message.level === 'silly') {
+      console.log(`${message.data}`);
+    }
+  };
+}
+
+setupElectronLogFixed({
   logsPath: PATHS.LOGS,
 });
 import sourceMapSupport from 'source-map-support';
