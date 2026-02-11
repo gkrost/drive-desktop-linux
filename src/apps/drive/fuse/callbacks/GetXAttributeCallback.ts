@@ -1,7 +1,6 @@
 import { FuseCallback } from './FuseCallback';
 import { VirtualDrive } from '../../virtual-drive/VirtualDrive';
-import { FuseError, FuseNoSuchFileOrDirectoryError } from './FuseErrors';
-import { FuseCodes } from './FuseCodes';
+import { FuseNoSuchFileOrDirectoryError } from './FuseErrors';
 
 export class GetXAttributeCallback extends FuseCallback<Buffer> {
   constructor(private readonly drive: VirtualDrive) {
@@ -16,10 +15,19 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
     return path === '/';
   }
 
-  async execute(path: string, _name: unknown, _size: unknown) {
-    // Name and size parameters are unused as this is a no-op callback
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async execute(path: string, name: unknown, _size: unknown) {
+    const attrName = String(name);
+
+    // Ignore certain system attributes that cause issues with FUSE on root
     if (this.isRootFolder(path)) {
-      return this.left(new FuseError(FuseCodes.ENOSYS, 'Cannot get the status of root folder'));
+      // Return empty buffer for ACL attributes on root folder
+      // to avoid assertion failures in native FUSE bindings
+      if (attrName.startsWith('system.posix_acl_')) {
+        return this.right(Buffer.from(''));
+      }
+      // Return on_remote for other attributes on root
+      return this.right(Buffer.from('on_remote'));
     }
 
     try {
@@ -31,6 +39,7 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
 
       const buff = Buffer.from('on_remote');
       return this.right(buff);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
       return this.left(new FuseNoSuchFileOrDirectoryError(path));
     }
