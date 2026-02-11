@@ -32,6 +32,11 @@ const configuration: webpack.Configuration = {
         issuer: /\.[jt]sx?$/,
         use: ['@svgr/webpack'],
       },
+      {
+        test: /\.m?js$/,
+        include: /node_modules\/@phosphor-icons/,
+        type: 'javascript/auto',
+      },
     ],
   },
 
@@ -53,6 +58,7 @@ const configuration: webpack.Configuration = {
     alias: {
       '@phosphor-icons/react': '@phosphor-icons/react/dist/index.es.js',
     },
+    mainFields: ['module', 'browser', 'main'],
   },
 
   plugins: [
