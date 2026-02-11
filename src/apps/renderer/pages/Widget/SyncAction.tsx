@@ -1,5 +1,5 @@
-import { CheckCircle, XCircle } from '@phosphor-icons/react';
-import { useEffect } from 'react';
+import { CheckCircle, XCircle, Clock } from '@phosphor-icons/react';
+import { useEffect, useMemo } from 'react';
 import { SyncStatus } from '../../../../context/desktop/sync/domain/SyncStatus';
 import Spinner from '../../assets/spinner.svg';
 import Button from '../../components/Button';
@@ -9,14 +9,27 @@ import useSyncStatus from '../../hooks/useSyncStatus';
 import useUsage from '../../hooks/useUsage';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus/useOnlineStatus';
 
+function formatWaitTime(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes > 0) {
+    return `${minutes}m ${seconds}s`;
+  }
+  return `${seconds}s`;
+}
+
 export default function SyncAction(props: { syncStatus: SyncStatus }) {
   const { translate } = useTranslationContext();
   const isOnLine = useOnlineStatus();
   const { usage, status } = useUsage();
   const { virtualDriveStatus } = useVirtualDriveStatus();
-  const { syncStatus } = useSyncStatus();
+  const { syncStatus, waitStatus } = useSyncStatus();
 
   const isSyncStopped = virtualDriveStatus && syncStatus && syncStatus === 'FAILED';
+  const isWaiting = waitStatus.waiting && isOnLine;
+  const waitTimeText = useMemo(() => formatWaitTime(waitStatus.remainingMs), [waitStatus.remainingMs]);
 
   const handleOpenUpgrade = async () => {
     try {
@@ -40,6 +53,16 @@ export default function SyncAction(props: { syncStatus: SyncStatus }) {
         {isOnLine ? (
           isSyncStopped ? (
             <>{/* SYNC IS STOPPED */}</>
+          ) : isWaiting ? (
+            <>
+              {/* WAITING */}
+              <div className="text-yellow-500 flex w-5 justify-center">
+                <Clock className="h-5 w-5 shrink-0" />
+              </div>
+              <span className="truncate">
+                {translate('widget.footer.action-description.waiting', { time: waitTimeText })}
+              </span>
+            </>
           ) : (
             <>
               {isOnLine && props.syncStatus === 'FAILED' && (

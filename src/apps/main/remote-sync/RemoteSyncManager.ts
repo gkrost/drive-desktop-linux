@@ -6,6 +6,7 @@ import {
   SyncConfig,
   rewind,
   SIX_HOURS_IN_MILLISECONDS,
+  isNetworkError,
 } from './helpers';
 import { DatabaseCollectionAdapter } from '../database/adapters/base';
 import axios, { Axios } from 'axios';
@@ -22,6 +23,9 @@ import { RemoteSyncErrorHandler } from './RemoteSyncErrorHandler/RemoteSyncError
 import { createOrUpdateFolderByBatch } from '../../../infra/sqlite/services/folder/create-or-update-folder-by-batch';
 import { createOrUpdateFileByBatch } from '../../../infra/sqlite/services/file/create-or-update-file-by-batch';
 
+const MAX_NETWORK_ERRORS = 3;
+const WAIT_DURATION_MS = 5 * 60 * 1000;
+
 export class RemoteSyncManager {
   private foldersSyncStatus: RemoteSyncStatus = 'IDLE';
   private filesSyncStatus: RemoteSyncStatus = 'IDLE';
@@ -29,6 +33,10 @@ export class RemoteSyncManager {
   private onStatusChangeCallbacks: Array<(newStatus: RemoteSyncStatus) => void> = [];
   private totalFilesSynced = 0;
   private totalFoldersSynced = 0;
+
+  private networkErrorCount = 0;
+  private waitUntil: number | null = null;
+  private waitTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private db: {
@@ -58,6 +66,76 @@ export class RemoteSyncManager {
     return this.status;
   }
 
+  getNetworkErrorCount(): number {
+    return this.networkErrorCount;
+  }
+
+  getWaitUntil(): number | null {
+    return this.waitUntil;
+  }
+
+  resetNetworkErrorCount() {
+    this.networkErrorCount = 0;
+    this.waitUntil = null;
+    if (this.waitTimeoutId) {
+      clearTimeout(this.waitTimeoutId);
+      this.waitTimeoutId = null;
+    }
+  }
+
+  reportNetworkError(statusCode?: number) {
+    this.networkErrorCount++;
+
+    if (this.networkErrorCount >= MAX_NETWORK_ERRORS) {
+      this.startWaitingPeriod();
+    }
+  }
+
+  private startWaitingPeriod() {
+    if (this.status === 'WAITING') return;
+
+    this.waitUntil = Date.now() + WAIT_DURATION_MS;
+
+    this.changeStatus('WAITING');
+
+    logger.debug({
+      tag: 'SYNC-ENGINE',
+      msg: `Network error threshold reached. Waiting for ${WAIT_DURATION_MS / 1000 / 60} minutes`,
+    });
+
+    this.waitTimeoutId = setTimeout(() => {
+      this.networkErrorCount = 0;
+      this.waitUntil = null;
+      this.waitTimeoutId = null;
+
+      if (this.status === 'WAITING') {
+        this.changeStatus('IDLE');
+      }
+
+      logger.debug({
+        tag: 'SYNC-ENGINE',
+        msg: 'Wait period complete, resuming sync',
+      });
+    }, WAIT_DURATION_MS);
+  }
+
+  /**
+   * Check if we should wait before making requests
+   */
+  shouldWait(): boolean {
+    if (this.waitUntil === null) return false;
+    return Date.now() < this.waitUntil;
+  }
+
+  /**
+   * Get remaining wait time in milliseconds, or 0 if not waiting
+   */
+  getRemainingWaitTime(): number {
+    if (this.waitUntil === null) return 0;
+    const remaining = this.waitUntil - Date.now();
+    return remaining > 0 ? remaining : 0;
+  }
+
   /**
    * Check if the RemoteSyncManager is in SYNCED status
    *
@@ -73,6 +151,7 @@ export class RemoteSyncManager {
     this.foldersSyncStatus = 'IDLE';
     this.totalFilesSynced = 0;
     this.totalFoldersSynced = 0;
+    this.resetNetworkErrorCount();
   }
 
   /**
@@ -87,6 +166,15 @@ export class RemoteSyncManager {
     if (!testPassed) {
       return;
     }
+
+    if (this.shouldWait()) {
+      logger.debug({
+        tag: 'SYNC-ENGINE',
+        msg: 'Skipping sync - in waiting period due to network errors',
+      });
+      return;
+    }
+
     this.totalFilesSynced = 0;
     this.totalFoldersSynced = 0;
     this.filesSyncStatus = 'IDLE';
@@ -144,6 +232,15 @@ export class RemoteSyncManager {
       return false;
     }
 
+    if (this.status === 'WAITING') {
+      logger.debug({
+        tag: 'SYNC-ENGINE',
+        msg: 'RemoteSyncManager is in WAITING status due to network errors, not starting again',
+      });
+
+      return false;
+    }
+
     return true;
   }
 
@@ -161,6 +258,10 @@ export class RemoteSyncManager {
   }
 
   private checkRemoteSyncStatus() {
+    if (this.status === 'WAITING') {
+      return;
+    }
+
     // We only syncing files
     if (this.config.syncFiles && !this.config.syncFolders && this.filesSyncStatus === 'SYNCED') {
       this.changeStatus('SYNCED');
@@ -229,6 +330,18 @@ export class RemoteSyncManager {
         retryCount = 0;
       } catch (error) {
         retryCount++;
+
+        const errorContext = error instanceof RemoteSyncNetworkError ? error.context : null;
+        if (
+          errorContext &&
+          typeof errorContext === 'object' &&
+          'status' in errorContext &&
+          isNetworkError((errorContext as { status?: number }).status as number)
+        ) {
+          this.reportNetworkError((errorContext as { status?: number }).status as number);
+        } else if (error instanceof RemoteSyncServerError && error.context && typeof error.context === 'object' && 'status' in error.context) {
+          this.reportNetworkError((error.context as { status?: number }).status as number);
+        }
 
         if (error instanceof RemoteSyncError) {
           this.errorHandler.handleSyncError(error, 'files', lastFileSynced?.name ?? 'unknown', fileCheckPoint);
@@ -303,6 +416,18 @@ export class RemoteSyncManager {
         retryCount = 0;
       } catch (error) {
         retryCount++;
+
+        const errorContext = error instanceof RemoteSyncNetworkError ? error.context : null;
+        if (
+          errorContext &&
+          typeof errorContext === 'object' &&
+          'status' in errorContext &&
+          isNetworkError((errorContext as { status?: number }).status as number)
+        ) {
+          this.reportNetworkError((errorContext as { status?: number }).status as number);
+        } else if (error instanceof RemoteSyncServerError && error.context && typeof error.context === 'object' && 'status' in error.context) {
+          this.reportNetworkError((error.context as { status?: number }).status as number);
+        }
 
         if (error instanceof RemoteSyncError) {
           this.errorHandler.handleSyncError(error, 'folders', lastFolderSynced?.name ?? 'unknown', folderCheckPoint);

@@ -1,4 +1,4 @@
-vi.mock('@gcas/fuse', () => ({
+vi.mock('fuse-native', () => ({
   default: vi.fn(),
   Fuse: vi.fn().mockImplementation(() => ({
     mount: vi.fn(),

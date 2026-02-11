@@ -10,7 +10,7 @@ vi.mock('electron', () => ({
   },
   ipcMain: {
     on: vi.fn(),
-    handle: vi.fn()
+    handle: vi.fn(),
   },
 }));
 
@@ -51,7 +51,7 @@ vi.mock('@internxt/drive-desktop-core/src/backend', () => ({
 }));
 
 // Mock native modules that require system libraries
-vi.mock('@gcas/fuse', () => ({
+vi.mock('fuse-native', () => ({
   default: vi.fn(),
   Fuse: vi.fn().mockImplementation(() => ({
     mount: vi.fn(),

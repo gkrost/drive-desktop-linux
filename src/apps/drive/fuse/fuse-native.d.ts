@@ -1,35 +1,41 @@
 declare module 'fuse-native' {
-  export interface FuseStat {
-    mtime: Date;
-    atime: Date;
-    ctime: Date;
-    size: number;
-    mode: number;
-    uid: number;
-    gid: number;
-  }
+  export const ENOSYS: number;
+  export const ENOENT: number;
+  export const EEXIST: number;
+  export const EIO: number;
+  export const EINVAL: number;
+  export const EACCES: number;
+  export const ENETDOWN: number;
+  export const ENODATA: number;
 
-  export interface FuseHandlers {
-    readdir(readPath: string, cb: (status: number, entries: string[]) => void): void;
-    getattr(readPath: string, cb: (status: number, stat?: FuseStat) => void): void;
-    open(readPath: string, flags: number, cb: (status: number, fd: number) => void): void;
-    release(readPath: string, fd: number, cb: (status: number) => void): void;
-    read(readPath: string, fd: number, buf: Buffer, len: number, pos: number, cb: (bytesRead: number) => void): void;
-  }
-
-  interface FuseOptions {
+  export interface FuseOptions {
     displayFolder?: string;
     debug?: boolean;
+    force?: boolean;
+    maxRead?: number;
+    umask?: number;
+    killOnCtrlC?: boolean;
+    autoUnmount?: boolean;
+    allowOther?: boolean;
+    timeout?: number | boolean | { [key: string]: number | boolean };
   }
 
-  class Fuse {
-    // static isConfigured(): boolean
-    mnt: string;
+  export type FuseCallback = (err: number | null) => void;
 
-    constructor(mnt: string, handlers: FuseHandlers, opts?: FuseOptions);
-    mount(cb: (error: Error | null) => void): void;
-    unmount(cb: (error: Error | null) => void): void;
+  export type FuseOperations = Record<string, unknown>;
+
+  export interface FuseInstance {
+    open(cb: (err: unknown) => void): void;
+    close(cb: (err: unknown) => void): void;
+    on(event: string, listener: (...args: unknown[]) => void): this;
+    mount(cb: (err: unknown) => void): void;
+    unmount(cb: (err: unknown) => void): void;
   }
 
-  export default Fuse;
+  export interface FuseStatic {
+    new (mnt: string, ops?: FuseOperations | null, opts?: FuseOptions): FuseInstance;
+    unmount(mnt: string, cb: (err: unknown) => void): void;
+  }
+
+  export default FuseStatic;
 }

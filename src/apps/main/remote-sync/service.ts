@@ -56,6 +56,14 @@ export async function startRemoteSync(): Promise<void> {
   await remoteSyncManager.startRemoteSync();
 }
 
+export function getRemoteSyncWaitStatus(): { waiting: boolean; remainingMs: number } {
+  const remaining = remoteSyncManager.getRemainingWaitTime();
+  return {
+    waiting: remaining > 0,
+    remainingMs: remaining,
+  };
+}
+
 const debouncedSynchronization = debounce(async () => {
   await startRemoteSync();
   eventBus.emit('REMOTE_CHANGES_SYNCHED');

@@ -183,7 +183,8 @@
       "action-description": {
         "syncing": "Sincronizando tus archivos",
         "updated": "Sincronizado",
-        "failed": "Sincronización fallida"
+        "failed": "Sincronización fallida",
+        "waiting": "Esperando por errores ({{time}})"
       },
       "errors": {
         "lock": "Sincronización bloqueada por otro dispositivo",

@@ -181,10 +181,13 @@
     "footer": {
       "action-description": {
         "syncing": "Synchronisation de vos fichiers",
-        "updated": "Mis à jour il y a quelques instants"
+        "updated": "Mis à jour il y a quelques instants",
+        "failed": "Échec de la synchronisation",
+        "waiting": "En attente en raison d'erreurs ({{time}})"
       },
       "errors": {
-        "lock": "Synchronisation bloquée par un autre dispositif"
+        "lock": "Synchronisation bloquée par un autre dispositif",
+        "offline": "Pas de connexion internet"
       }
     },
     "sync-error": {

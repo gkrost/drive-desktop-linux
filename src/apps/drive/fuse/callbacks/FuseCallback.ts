@@ -114,16 +114,21 @@ export abstract class FuseCallback<T> {
       logger.debug({ msg: `${this.name}: `, params });
     }
 
-    const result = await this.executeAndCatch(params);
+    try {
+      const result = await this.executeAndCatch(params);
 
-    if (result.isLeft()) {
-      const error = result.getLeft();
-      return callback(error.code);
+      if (result.isLeft()) {
+        const error = result.getLeft();
+        return callback(error.code);
+      }
+
+      const data = result.getRight();
+
+      callback(FuseCallback.OK, data);
+    } catch (fatalError: unknown) {
+      logger.error({ msg: `${this.name} FATAL ERROR:`, error: fatalError });
+      callback(FuseCodes.EIO);
     }
-
-    const data = result.getRight();
-
-    callback(FuseCallback.OK, data);
   }
 
   abstract execute(...params: unknown[]): Promise<Either<FuseError, T>>;
@@ -141,22 +146,27 @@ export abstract class NotifyFuseCallback extends FuseCallback<undefined> {
       logger.debug({ msg: `${this.name}: `, params });
     }
 
-    const result = await this.executeAndCatch(params);
+    try {
+      const result = await this.executeAndCatch(params);
 
-    if (result.isLeft()) {
-      const error = result.getLeft();
+      if (result.isLeft()) {
+        const error = result.getLeft();
 
-      if (this.debug.output) {
-        logger.debug({ msg: `${this.name}`, error });
+        if (this.debug.output) {
+          logger.debug({ msg: `${this.name}`, error });
+        }
+
+        return callback(error.code);
       }
 
-      return callback(error.code);
-    }
+      if (this.debug.output) {
+        logger.debug({ msg: `${this.name} completed successfully ${params[0]}` });
+      }
 
-    if (this.debug.output) {
-      logger.debug({ msg: `${this.name} completed successfully ${params[0]}` });
+      callback(NotifyFuseCallback.OK);
+    } catch (fatalError: unknown) {
+      logger.error({ msg: `${this.name} FATAL ERROR:`, error: fatalError });
+      callback(FuseCodes.EIO);
     }
-
-    callback(NotifyFuseCallback.OK);
   }
 }

@@ -70,7 +70,7 @@
     },
     "deb": {
       "depends": [
-        "libfuse2",
+        "libfuse3-3",
         "python3-nautilus"
       ]
     },
@@ -169,7 +169,7 @@
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
-    "@gcas/fuse": "^2.4.2",
+    "fuse-native": "^2.2.6",
     "@headlessui/react": "^2.2.0",
     "@iconscout/react-unicons": "^1.1.6",
     "@internxt/drive-desktop-core": "0.1.7",

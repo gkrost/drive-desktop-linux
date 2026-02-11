@@ -2,7 +2,7 @@ import { FuseCallback, CallbackWithData } from './FuseCallback';
 import { VirtualDrive } from '../../virtual-drive/VirtualDrive';
 import { FuseNoSuchFileOrDirectoryError } from './FuseErrors';
 import { logger } from '@internxt/drive-desktop-core/build/backend';
-import Fuse from '@gcas/fuse';
+import Fuse from 'fuse-native';
 
 const XATTR_SYSTEM_POSIX_ACL_PREFIX = 'system.posix_acl_';
 

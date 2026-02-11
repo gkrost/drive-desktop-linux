@@ -11,7 +11,14 @@ type Props = {
   url: string;
 };
 
-export async function handleDeeplink({ url }: Props) {
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function handleDeeplink({ url }: Props): Promise<boolean> {
   try {
     const deeplinkParams = await processDeeplink({ url });
 
@@ -24,7 +31,27 @@ export async function handleDeeplink({ url }: Props) {
 
     logger.debug({ tag: 'AUTH', msg: 'Auth details stored successfully from deeplink' });
 
-    await initializeCurrentUser();
+    let retries = 0;
+    let initialized = false;
+
+    while (!initialized && retries < MAX_RETRIES) {
+      try {
+        await initializeCurrentUser();
+        initialized = true;
+      } catch (error) {
+        retries++;
+        logger.warn({ tag: 'AUTH', msg: `initializeCurrentUser attempt ${retries}/${MAX_RETRIES} failed`, error });
+
+        if (retries < MAX_RETRIES) {
+          await sleep(RETRY_DELAY_MS * retries);
+        }
+      }
+    }
+
+    if (!initialized) {
+      logger.error({ tag: 'AUTH', msg: 'Failed to initialize current user after retries' });
+      return false;
+    }
 
     await setupRootFolder();
 

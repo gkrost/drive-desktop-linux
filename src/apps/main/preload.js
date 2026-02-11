@@ -280,6 +280,9 @@ contextBridge.exposeInMainWorld('electron', {
   getRemoteSyncStatus() {
     return ipcRenderer.invoke('get-remote-sync-status');
   },
+  getRemoteSyncWaitStatus() {
+    return ipcRenderer.invoke('get-remote-sync-wait-status');
+  },
   startRemoteSync() {
     return ipcRenderer.invoke('START_REMOTE_SYNC');
   },

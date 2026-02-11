@@ -1,9 +1,12 @@
 import { app, dialog, shell } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import configStore from '../config';
 import eventBus from '../event-bus';
-import { exec } from 'child_process';
+
+const execAsync = promisify(exec);
 
 const ROOT_FOLDER_NAME = 'Internxt Drive';
 const HOME_FOLDER_PATH = app.getPath('home');
@@ -103,4 +106,68 @@ export async function openVirtualDriveRootFolder() {
   const errorMessage = await shell.openPath(syncFolderPath);
 
   if (errorMessage) throw new Error(errorMessage);
+}
+
+export interface ZombieMountCleanupResult {
+  wasMounted: boolean;
+  unmounted: boolean;
+  error?: string;
+}
+
+export async function checkAndCleanupZombieMount(mountPath: string): Promise<ZombieMountCleanupResult> {
+  const result: ZombieMountCleanupResult = {
+    wasMounted: false,
+    unmounted: false,
+  };
+
+  if (process.platform !== 'linux') {
+    return result;
+  }
+
+  try {
+    const mountPathNormalized = path.normalize(mountPath);
+
+    const mountsContent = await fs.readFile('/proc/mounts', 'utf-8');
+    const isMounted = mountsContent.split('\n').some((line) => {
+      const parts = line.split(' ');
+      if (parts.length >= 2) {
+        const mountedPath = path.normalize(parts[1]);
+        return mountedPath === mountPathNormalized;
+      }
+      return false;
+    });
+
+    if (!isMounted) {
+      const folderExists = await existsFolder(mountPath);
+      if (folderExists) {
+        result.wasMounted = true;
+        result.error = 'Mount not in /proc/mounts but folder exists - may be orphaned';
+      }
+      return result;
+    }
+
+    result.wasMounted = true;
+
+    try {
+      await execAsync(`umount "${mountPath}"`);
+      result.unmounted = true;
+    } catch (unmountError) {
+      try {
+        await execAsync(`fusermount -u "${mountPath}"`);
+        result.unmounted = true;
+      } catch (fusermountError) {
+        result.error = `umount failed: ${unmountError instanceof Error ? unmountError.message : String(unmountError)}; fusermount also failed: ${fusermountError instanceof Error ? fusermountError.message : String(fusermountError)}`;
+      }
+    }
+  } catch (error) {
+    result.error = error instanceof Error ? error.message : String(error);
+  }
+
+  return result;
+}
+
+export async function cleanupZombieMounts(): Promise<ZombieMountCleanupResult | null> {
+  const mountPath = getRootVirtualDrive() || VIRTUAL_DRIVE_FOLDER;
+
+  return checkAndCleanupZombieMount(mountPath);
 }

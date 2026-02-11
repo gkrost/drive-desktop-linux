@@ -2,13 +2,15 @@ import { ipcMain } from 'electron';
 import { logger } from '@internxt/drive-desktop-core/build/backend';
 import eventBus from '../event-bus';
 import { setInitialSyncState } from './InitialSyncReady';
-import { remoteSyncManager, resyncRemoteSync, startRemoteSync } from './service';
+import { remoteSyncManager, resyncRemoteSync, startRemoteSync, getRemoteSyncWaitStatus } from './service';
 
 ipcMain.handle('START_REMOTE_SYNC', async () => {
   await startRemoteSync();
 });
 
 ipcMain.handle('get-remote-sync-status', () => remoteSyncManager.getSyncStatus());
+
+ipcMain.handle('get-remote-sync-wait-status', () => getRemoteSyncWaitStatus());
 
 eventBus.on('RECEIVED_REMOTE_CHANGES', async () => {
   // Wait before checking for updates, could be possible

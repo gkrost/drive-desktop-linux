@@ -2,6 +2,7 @@ import { Service } from 'diod';
 import { File } from '../../../../virtual-drive/files/domain/File';
 import { ThumbnailsRepository } from '../../domain/ThumbnailsRepository';
 import { ThumbnailCollection } from '../../domain/ThumbnailCollection';
+import { logger } from '@internxt/drive-desktop-core/build/backend';
 
 @Service()
 export class ThumbnailSynchronizer {
@@ -54,21 +55,27 @@ export class ThumbnailSynchronizer {
       },
     );
 
-    const remoteThumbnailsPromises = grouped.thumbnable.map((file) => {
-      return this.remote.retrieve(file);
-    });
+    const remoteCollections: Array<ThumbnailCollection | undefined> = [];
+
+    for (const file of grouped.thumbnable) {
+      try {
+        const collection = await this.remote.retrieve(file);
+        remoteCollections.push(collection);
+      } catch (err) {
+        logger.error({ msg: 'Error retrieving thumbnail for file', fileId: file.id, name: file.name, error: err });
+        remoteCollections.push(undefined);
+      }
+    }
 
     const localThumbnailsPromises = files.map((file) => this.local.retrieve(file));
 
-    const remoteCollections = (await Promise.all(remoteThumbnailsPromises)).filter(
-      (c) => c !== undefined,
-    ) as Array<ThumbnailCollection>;
+    const resolvedRemoteCollections = remoteCollections.filter((c) => c !== undefined) as Array<ThumbnailCollection>;
 
     const localCollections = (await Promise.all(localThumbnailsPromises)).filter(
       (c) => c !== undefined,
     ) as Array<ThumbnailCollection>;
 
-    await this.sync(remoteCollections, localCollections);
+    await this.sync(resolvedRemoteCollections, localCollections);
 
     const defaultPromises = grouped.noThumbnable.map(async (file) => {
       const alreadyExists = await this.local.has(file);

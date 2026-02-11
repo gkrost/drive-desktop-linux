@@ -24,9 +24,17 @@ import { ThumbnailSynchronizer } from '../../../context/storage/thumbnails/appli
 import { EventEmitter } from 'stream';
 import { getExistingFiles } from '../../main/remote-sync/service';
 import configStore from '../../main/config';
-
-import Fuse from '@gcas/fuse';
+import Fuse from 'fuse-native';
 import { DriveFile } from 'src/apps/main/database/entities/DriveFile';
+
+type FuseOperations = Record<string, unknown>;
+type FuseOptions = {
+  debug?: boolean;
+  force?: boolean;
+  maxRead?: number;
+  umask?: number;
+  killOnCtrlC?: boolean;
+};
 
 const STORAGE_MIGRATION_DATE = new Date(configStore.get('storageMigrationDate'));
 const FIX_DEPLOYMENT_DATE = new Date(configStore.get('fixDeploymentDate'));
@@ -35,7 +43,7 @@ export class FuseApp extends EventEmitter {
   private status: FuseDriveStatus = 'UNMOUNTED';
   private static readonly MAX_INT_32 = 2147483647;
   private static readonly MAX_RETRIES = 5;
-  private _fuse: Fuse | undefined;
+  private _fuse: InstanceType<typeof Fuse> | undefined;
 
   constructor(
     private readonly virtualDrive: VirtualDrive,
@@ -125,10 +133,7 @@ export class FuseApp extends EventEmitter {
     void this.fixDanglingFiles(STORAGE_MIGRATION_DATE, FIX_DEPLOYMENT_DATE);
   }
 
-  async stop() {
-    // It is not possible to implement this method while still using @gcas/fuse.
-    // For more information, see this ticket. https://inxt.atlassian.net/browse/PB-5389
-  }
+  async stop() {}
 
   async clearCache(): Promise<void> {
     await this.container.get(StorageClearer).run();
@@ -155,7 +160,7 @@ export class FuseApp extends EventEmitter {
     return this.status;
   }
 
-  async mount() {
+  async mount(): Promise<FuseDriveStatus> {
     if (this.status === 'MOUNTED') {
       logger.debug({ msg: '[FUSE] Already mounted' });
       return this.status;
@@ -179,16 +184,13 @@ export class FuseApp extends EventEmitter {
   }
 
   private async mountWithRetries(): Promise<boolean> {
-    // eslint-disable-next-line no-await-in-loop
     for (let attempt = 1; attempt <= FuseApp.MAX_RETRIES; attempt++) {
-      // eslint-disable-next-line no-await-in-loop
       const status = await this.mount();
 
       if (status === 'MOUNTED') return true;
 
       if (attempt < FuseApp.MAX_RETRIES) {
         const delay = Math.min(1000 * attempt, 3000);
-        // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }

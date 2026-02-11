@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import Fuse from '@gcas/fuse';
+import Fuse from 'fuse-native';
 
 export enum FuseCodes {
   // Operation not supported (Functionality not implemented)

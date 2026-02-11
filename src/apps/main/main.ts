@@ -17,16 +17,13 @@ function setupElectronLogFixed({ logsPath }: { logsPath: string }) {
   const defaultLogs = path.join(logsPath, 'drive.log');
   const importantLogs = path.join(logsPath, 'drive-important.log');
 
-  // Force file transport initialization by accessing it
-  // In electron-log v5, transports are created lazily
   const fileTransport = electronLog.transports.file;
   if (fileTransport) {
-    fileTransport.resolvePathFn = (_, message) => {
-      if (message?.level === 'info') {
+    fileTransport.resolvePathFn = (vars, message) => {
+      if (message && message.level === 'info') {
         return importantLogs;
-      } else {
-        return defaultLogs;
       }
+      return defaultLogs;
     };
 
     fileTransport.maxSize = 1024 * 1024 * 1024;
@@ -45,6 +42,9 @@ function setupElectronLogFixed({ logsPath }: { logsPath: string }) {
 setupElectronLogFixed({
   logsPath: PATHS.LOGS,
 });
+
+// Force file transport initialization by logging something
+electronLog.info('Logging system initialized');
 import sourceMapSupport from 'source-map-support';
 import electronDebug from 'electron-debug';
 
@@ -279,8 +279,16 @@ process.on('uncaughtException', (error) => {
     try {
       logger.error({ msg: 'Uncaught exception in main process: ', error });
     } catch {
-      return;
+      console.error('Failed to log uncaught exception:', error);
     }
+  }
+});
+
+process.on('unhandledRejection', (reason) => {
+  try {
+    logger.error({ msg: 'Unhandled promise rejection:', error: reason });
+  } catch {
+    console.error('Failed to log unhandled rejection:', reason);
   }
 });
 

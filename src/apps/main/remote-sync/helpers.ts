@@ -32,7 +32,14 @@ export type RemoteSyncedFolder = {
   status: string;
 };
 
-export type RemoteSyncStatus = 'IDLE' | 'SYNCED' | 'SYNCING' | 'SYNC_FAILED';
+export type RemoteSyncStatus = 'IDLE' | 'SYNCED' | 'SYNCING' | 'SYNC_FAILED' | 'WAITING';
+
+export const NETWORK_ERROR_STATUSES = [429, 503, 504] as const;
+export type NetworkErrorStatus = (typeof NETWORK_ERROR_STATUSES)[number];
+
+export const isNetworkError = (status: number): status is NetworkErrorStatus => {
+  return NETWORK_ERROR_STATUSES.includes(status as NetworkErrorStatus);
+};
 export type SyncConfig = {
   retry: number;
   maxRetries: number;
