@@ -3,6 +3,8 @@ import { VirtualDrive } from '../../virtual-drive/VirtualDrive';
 import { FuseNoSuchFileOrDirectoryError } from './FuseErrors';
 import Fuse from '@gcas/fuse';
 
+const XATTR_SYSTEM_POSIX_ACL_PREFIX = 'system.posix_acl_';
+
 export class GetXAttributeCallback extends FuseCallback<Buffer> {
   private static readonly ENODATA = Fuse.ENODATA;
 
@@ -18,15 +20,17 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
     return path === '/';
   }
 
+  private isSystemAclAttribute(name: string): boolean {
+    return name.startsWith(XATTR_SYSTEM_POSIX_ACL_PREFIX);
+  }
+
   async execute(path: string, name: unknown, _size: unknown) {
     const attrName = String(name);
 
-    // Return ENODATA for system ACL attributes on root folder
-    // to avoid assertion failures in native FUSE bindings
-    if (this.isRootFolder(path) && attrName.startsWith('system.posix_acl_')) {
-      return this.left(
-        new FuseErrorWithCode(GetXAttributeCallback.ENODATA, 'No data available for ACL attribute on root'),
-      );
+    // Return ENODATA for ACL attributes on root folder to avoid native assertion failures
+    // These attributes are system-level and not relevant for virtual drive
+    if (this.isRootFolder(path) && this.isSystemAclAttribute(attrName)) {
+      return this.left(new FuseErrorWithCode(GetXAttributeCallback.ENODATA, `No data available for ${attrName}`));
     }
 
     try {
