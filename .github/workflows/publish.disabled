@@ -1,0 +1,51 @@
+name: Publish Package to Github
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Create .npmrc file
+        run: |
+          echo "@internxt:registry=https://npm.pkg.github.com/" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Add .env
+        run: |
+          touch .env
+          echo "CRYPTO_KEY=${{ secrets.CRYPTO_KEY }}" >> .env
+          echo "MAGIC_IV=${{ secrets.MAGIC_IV }}" >> .env
+          echo "MAGIC_SALT=${{ secrets.MAGIC_SALT }}" >> .env
+          echo "NEW_CRYPTO_KEY=${{ secrets.NEW_CRYPTO_KEY }}" >> .env
+          echo "NEW_DRIVE_URL=https://gateway.internxt.com/drive" >> .env
+          echo "DRIVE_API_URL=https://gateway.internxt.com/api" >> .env
+          echo "PAYMENTS_URL=https://gateway.internxt.com/payments" >> .env
+          echo "INTERNXT_DESKTOP_HEADER_KEY=${{ secrets.INTERNXT_DESKTOP_HEADER_KEY }}" >> .env
+          echo "BRIDGE_URL=https://gateway.internxt.com/network" >> .env
+          echo "APP_SEGMENT_KEY=${{ secrets.APP_SEGMENT_KEY }}" >> .env
+          echo "APP_SEGMENT_KEY_TEST=${{ secrets.APP_SEGMENT_KEY_TEST }}" >> .env
+          echo "BUG_REPORTING_URL=https://desktop-bug-reporting.inxt.workers.dev" >> .env
+          echo "NOTIFICATIONS_URL=https://notifications.internxt.com" >> .env
+          echo "LOCK_REFRESH_INTERVAL=20000" >> .env
+
+      - name: Build app
+        run: npm run build
+
+      - name: Publish app
+        run: npm run publish
