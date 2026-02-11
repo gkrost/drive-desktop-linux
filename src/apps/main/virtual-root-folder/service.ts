@@ -4,7 +4,6 @@ import path from 'path';
 import configStore from '../config';
 import eventBus from '../event-bus';
 import { exec } from 'child_process';
-import { ensureFolderExists } from '../../shared/fs/ensure-folder-exists';
 
 const ROOT_FOLDER_NAME = 'Internxt Drive';
 const HOME_FOLDER_PATH = app.getPath('home');
@@ -64,6 +63,12 @@ export async function setupRootFolder(n = 0): Promise<void> {
   }
 }
 
+export async function getRootVirtualDrive() {
+  const syncFolderPath = configStore.get('syncRoot') || '';
+
+  return syncFolderPath;
+}
+
 export async function chooseSyncRootWithDialog(): Promise<string | null> {
   const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
   if (!result.canceled) {
@@ -79,7 +84,7 @@ export async function chooseSyncRootWithDialog(): Promise<string | null> {
 }
 
 export async function openVirtualDriveRootFolder() {
-  const syncFolderPath = getRootVirtualDrive();
+  const syncFolderPath = configStore.get('syncRoot') || '';
 
   if (process.platform === 'linux') {
     // shell.openPath is not working as intended with the mounted directory
