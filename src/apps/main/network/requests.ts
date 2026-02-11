@@ -157,6 +157,7 @@ async function replaceMirror(
   excludeNodes: string[] = [],
   opts?: AxiosRequestConfig,
 ): Promise<Mirror> {
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
     const [newMirror] = await getFileMirrors(networkApiUrl, bucketId, fileId, 1, pointerIndex, excludeNodes, opts);
