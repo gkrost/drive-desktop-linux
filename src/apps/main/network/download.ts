@@ -66,7 +66,7 @@ export async function downloadFolderAsZip(
     // eslint-disable-next-line no-await-in-loop
     for (const file of files) {
       if (abortController?.signal.aborted) {
-        throw new Error('Download cancelled');
+        throw new Error('Download cancelled by user');
       }
 
       const displayFilename = items.getItemDisplayName({
@@ -97,7 +97,7 @@ export async function downloadFolderAsZip(
   }
 
   if (abortController?.signal.aborted) {
-    throw new Error('Download cancelled');
+    throw new Error('Download cancelled by user');
   }
 
   return zip.close();
@@ -200,7 +200,7 @@ async function _downloadFile(params: IDownloadParams): Promise<ReadableStream<Ui
   } else if (token) {
     metadata = await getRequiredFileMetadataWithToken(networkApiUrl, bucketId, fileId, token);
   } else {
-    throw new Error('Download error 1');
+    throw new Error('Download failed: No authentication credentials provided');
   }
 
   const { mirrors, fileMeta } = metadata;
@@ -215,7 +215,7 @@ async function _downloadFile(params: IDownloadParams): Promise<ReadableStream<Ui
   } else if (params.mnemonic) {
     key = await GenerateFileKey(params.mnemonic, bucketId, index);
   } else {
-    throw new Error('Download error code 1');
+    throw new Error('Download failed: No encryption key or mnemonic provided');
   }
 
   const downloadStream = await getFileDownloadStream(
@@ -236,17 +236,15 @@ async function getFileDownloadStream(
 ): Promise<ReadableStream> {
   const encryptedContentParts: ReadableStream<Uint8Array>[] = [];
 
-  // eslint-disable-next-line no-await-in-loop
   for (const downloadUrl of downloadUrls) {
     if (abortController?.signal.aborted) {
-      throw new Error('Download aborted');
+      throw new Error('Download aborted by user');
     }
-    // eslint-disable-next-line no-await-in-loop
     const encryptedStream = await fetch(downloadUrl, {
       signal: abortController?.signal,
     });
     if (!encryptedStream.body) {
-      throw new Error('No content received');
+      throw new Error('Download failed: Empty response body from server');
     }
     encryptedContentParts.push(convertToReadableStream(encryptedStream.body as Readable));
   }

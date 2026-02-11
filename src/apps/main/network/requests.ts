@@ -137,11 +137,11 @@ export async function getMirrors(
       mirrors[mirror.index] = await replaceMirror(networkApiUrl, bucketId, fileId, mirror.index, [], requestConfig);
 
       if (!isFarmerOk(mirrors[mirror.index].farmer)) {
-        throw new Error('Missing pointer for shard %s' + mirror.hash);
+        throw new Error(`Missing pointer for shard ${mirror.hash}`);
       }
 
       if (!mirrors[mirror.index].url) {
-        throw new Error('Missing download url for shard %s' + mirror.hash);
+        throw new Error(`Missing download url for shard ${mirror.hash}`);
       }
     }
   }
