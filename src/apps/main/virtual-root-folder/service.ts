@@ -63,7 +63,7 @@ export async function setupRootFolder(n = 0): Promise<void> {
   }
 }
 
-export async function getRootVirtualDrive() {
+export function getRootVirtualDrive() {
   const syncFolderPath = configStore.get('syncRoot') || '';
 
   return syncFolderPath;
