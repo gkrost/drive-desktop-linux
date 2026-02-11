@@ -5,7 +5,7 @@ export class ContainerMock implements Partial<Container> {
 
   get = vi.fn((service) => this.services.get(service));
 
-  set<T>(service: any, implementation: T): void {
+  set<T>(service: unknown, implementation: T): void {
     this.services.set(service, implementation);
   }
 

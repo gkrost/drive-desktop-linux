@@ -7,6 +7,7 @@ export class CreateCallback extends NotifyFuseCallback {
     super('Create');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async execute(path: string, _mode: unknown) {
     // Mode parameter is unused as this is a no-op callback
     await this.container.get(TemporalFileCreator).run(path);

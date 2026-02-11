@@ -125,7 +125,7 @@ describe('DiffFilesCalculatorService', () => {
   });
 
   it('should add the dangling files to the result only if the files are properly dangled files', () => {
-    // @ts-expect-error
+    // @ts-expect-error - mock implementation for test
     (configStore.get as jest.Mock).mockImplementation((key: string) => {
       if (key === 'storageMigrationDate') return '2025-02-19T00:00:00Z';
       if (key === 'fixDeploymentDate') return '2025-03-01T00:00:00Z';
@@ -175,7 +175,7 @@ describe('DiffFilesCalculatorService', () => {
     });
 
     it('should return true when the file is dangled', () => {
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation for test
       (configStore.get as Mock).mockImplementation((key: string) => {
         if (key === 'storageMigrationDate') return '2025-02-19T12:00:00Z';
         if (key === 'fixDeploymentDate') return '2025-03-04T15:30:00Z';
@@ -187,7 +187,7 @@ describe('DiffFilesCalculatorService', () => {
     });
 
     it('should return false when the file was created before the migration date', () => {
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation for test
       (configStore.get as Mock).mockImplementation((key: string) => {
         if (key === 'storageMigrationDate') return '2025-02-19T12:00:00Z';
         if (key === 'fixDeploymentDate') return '2025-03-04T15:30:00Z';
@@ -199,7 +199,7 @@ describe('DiffFilesCalculatorService', () => {
     });
 
     it('should return false when the file was created after the fix date', () => {
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation for test
       (configStore.get as Mock).mockImplementation((key: string) => {
         if (key === 'storageMigrationDate') return '2025-02-19T12:00:00Z';
         if (key === 'fixDeploymentDate') return '2025-03-04T15:30:00Z';
@@ -211,7 +211,7 @@ describe('DiffFilesCalculatorService', () => {
     });
 
     it('should return false when the storageMigrationDate is not found', () => {
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation for test
       (configStore.get as Mock).mockImplementation((key: string) => {
         if (key === 'storageMigrationDate') return undefined;
         if (key === 'fixDeploymentDate') return '2025-03-04T15:30:00Z';
@@ -223,7 +223,7 @@ describe('DiffFilesCalculatorService', () => {
     });
 
     it('should return false when the fixDeploymentDate is not found', () => {
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation for test
       (configStore.get as Mock).mockImplementation((key: string) => {
         if (key === 'storageMigrationDate') return '2025-02-19T12:00:00Z';
         if (key === 'fixDeploymentDate') return undefined;
@@ -235,7 +235,6 @@ describe('DiffFilesCalculatorService', () => {
     });
 
     it('should return false when both dates are not found', () => {
-      // @ts-ignore
       (configStore.get as Mock).mockReturnValue(undefined);
 
       const createdAt = new Date('2025-02-20');

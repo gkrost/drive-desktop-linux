@@ -103,10 +103,10 @@ export abstract class FuseCallback<T> {
     logger.debug({ msg: `${this.name}: `, message });
   }
 
-  async handle(...params: any[]): Promise<void> {
+  async handle(...params: unknown[]): Promise<void> {
     const callback = params.pop() as CallbackWithData<T>;
 
-    if (PathsToIgnore.some((regex) => regex.test(params[0]))) {
+    if (PathsToIgnore.some((regex) => regex.test(params[0] as string))) {
       return callback(FuseCodes.EINVAL);
     }
 
@@ -134,7 +134,7 @@ export abstract class NotifyFuseCallback extends FuseCallback<undefined> {
     return right(undefined);
   }
 
-  async handle(...params: any[]): Promise<void> {
+  async handle(...params: unknown[]): Promise<void> {
     const callback = params.pop() as Callback;
 
     if (this.debug.input) {

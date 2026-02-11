@@ -83,9 +83,7 @@ export async function startCleanup(viewModel: CleanerViewModel): Promise<void> {
   });
 
   // Process all files in parallel
-  const deletionResults = await Promise.all(
-    itemsToDelete.map((item, index) => deleteFileSafely(item.fullPath)),
-  );
+  const deletionResults = await Promise.all(itemsToDelete.map((item, index) => deleteFileSafely(item.fullPath)));
 
   // Calculate totals using module-level counters
   deletedFilesCount = 0;
@@ -113,7 +111,6 @@ export async function startCleanup(viewModel: CleanerViewModel): Promise<void> {
       cleaning: true,
       cleaningCompleted: false,
     });
-  });
   });
 
   // 3. Emit completion - at finish (always completed: true)

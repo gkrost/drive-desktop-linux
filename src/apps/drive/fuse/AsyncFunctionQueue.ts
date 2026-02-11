@@ -3,8 +3,8 @@ export class AsyncFunctionQueue {
 
   constructor(private readonly asyncFunction: (...params: unknown[]) => Promise<void>) {}
 
-  async enqueue(...params: any[]): Promise<void> {
-    const key = params[0];
+  async enqueue(...params: unknown[]): Promise<void> {
+    const key = params[0] as string;
 
     if (this.queue.has(key)) {
       const promise = this.queue.get(key);

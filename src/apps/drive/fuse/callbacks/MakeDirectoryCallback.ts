@@ -9,6 +9,7 @@ export class MakeDirectoryCallback extends NotifyFuseCallback {
     super('Make Directory');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async execute(path: string, _mode: unknown) {
     // Mode parameter is unused as this is a no-op callback
     if (path.startsWith('/.Trash')) {

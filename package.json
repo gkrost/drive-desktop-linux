@@ -1,12 +1,12 @@
 {
   "name": "internxt",
-  "version": "2.5.667",
-  "author": "Internxt <hello@internxt.com>",
-  "description": "Internxt Drive client UI",
+  "version": "2.5.668",
+  "author": "Gernot <gernot@krost.org>",
+  "description": "Enhanced Internxt Drive client UI",
   "main": "./dist/main/main.js",
   "license": "AGPL-3.0",
   "repository": {
-    "url": "https://github.com/internxt/drive-desktop-linux"
+    "url": "https://github.com/gkrost/drive-desktop-linux"
   },
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
@@ -170,18 +170,18 @@
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
     "@gcas/fuse": "^2.4.2",
-    "@headlessui/react": "^1.7.19",
+    "@headlessui/react": "^2.2.0",
     "@iconscout/react-unicons": "^1.1.6",
     "@internxt/drive-desktop-core": "0.1.7",
-    "@internxt/inxt-js": "^2.2.3",
+    "@internxt/inxt-js": "^2.2.9",
     "@internxt/lib": "^1.4.1",
     "@internxt/sdk": "1.12.6",
-    "@phosphor-icons/react": "2.0.9",
-    "@radix-ui/react-select": "^1.2.2",
-    "@tanstack/react-virtual": "^3.13.12",
+    "@phosphor-icons/react": "2.1.10",
+    "@radix-ui/react-select": "^2.2.6",
+    "@tanstack/react-virtual": "^3.13.18",
     "async": "^3.2.4",
     "axios": "^1.13.5",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^12.6.2",
     "bottleneck": "^2.19.5",
     "bytes": "^3.1.1",
     "chance": "^1.1.11",

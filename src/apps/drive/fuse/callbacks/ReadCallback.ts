@@ -24,6 +24,7 @@ export class ReadCallback {
         return chunk.length;
       }
     } catch (error: unknown) {
+      // File not in cache, will download
       logger.debug({ msg: '[ReadCallback] File not in cache:', path });
     }
 

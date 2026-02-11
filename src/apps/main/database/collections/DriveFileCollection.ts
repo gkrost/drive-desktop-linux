@@ -28,7 +28,7 @@ export class DriveFilesCollection implements DatabaseCollectionAdapter<DriveFile
         success: true,
         result,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         result: [],
@@ -47,7 +47,7 @@ export class DriveFilesCollection implements DatabaseCollectionAdapter<DriveFile
 
         result,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
 

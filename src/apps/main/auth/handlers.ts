@@ -6,12 +6,6 @@ import { getWidget } from '../windows/widget';
 import { createTokenScheduleWithRetry } from './refresh-token/create-token-schedule-with-retry';
 import { encryptToken, getHeaders, getNewApiHeaders, getUser, logout, obtainToken, tokensArePresent } from './service';
 
-let isLoggedIn = false;
-
-if (getUser() && tokensArePresent()) {
-  setIsLoggedIn(true);
-}
-
 export function setIsLoggedIn(value: boolean) {
   isLoggedIn = value;
 
@@ -63,3 +57,9 @@ eventBus.on('APP_IS_READY', async (): Promise<void> => {
     eventBus.emit('USER_LOGGED_IN');
   }
 });
+
+let isLoggedIn = false;
+
+if (getUser() && tokensArePresent()) {
+  setIsLoggedIn(true);
+}

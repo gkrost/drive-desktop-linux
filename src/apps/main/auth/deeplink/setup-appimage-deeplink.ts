@@ -39,10 +39,10 @@ async function extractExecPath() {
   }
 }
 
-async function installDesktopFile(appImagePath: string) {
+async function installDesktopFile(execPath: string) {
   const desktopContent = `[Desktop Entry]
   Name=Internxt
-  Exec=${appImagePath} %u
+  Exec=${execPath} %u
   Terminal=false
   Type=Application
   MimeType=x-scheme-handler/internxt;`;
