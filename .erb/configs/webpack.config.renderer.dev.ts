@@ -104,11 +104,6 @@ const configuration: webpack.Configuration = {
       },
     ],
   },
-  resolve: {
-    alias: {
-      '@phosphor-icons/react': '@phosphor-icons/react/dist/index.es.js',
-    },
-  },
   plugins: [
     ...(requiredByDLLConfig
       ? []

@@ -55,9 +55,6 @@ const configuration: webpack.Configuration = {
     symlinks: false,
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     modules: [webpackPaths.srcPath, 'node_modules'],
-    alias: {
-      '@phosphor-icons/react': '@phosphor-icons/react/dist/index.es.js',
-    },
     mainFields: ['module', 'browser', 'main'],
   },
 
