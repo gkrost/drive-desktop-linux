@@ -1,0 +1,15 @@
+--- a/node_modules/fuse-native/fuse-native.c
++++ b/node_modules/fuse-native/fuse-native.c
+@@ -510,8 +510,6 @@ FUSE_METHOD(getxattr, 4, 1, (const char *path, const char *name, char *value, si
+   napi_create_uint32(env, 0, &(argv[5]));
+ }, {
+-  if (IS_ARRAY_BUFFER_DETACH_SUPPORTED == 1) assert(napi_detach_arraybuffer(env, argv[2]) == napi_ok);
+ })
+ 
+ #endif
+@@ -522,8 +520,6 @@ FUSE_METHOD(listxattr, 2, 1, (const char *path, char *list, size_t size), {
+   napi_create_string_utf8(env, l->path, NAPI_AUTO_LENGTH, &(argv[2]));
+   napi_create_external_buffer(env, l->size, l->list, NULL, NULL, &(argv[3]));
+ }, {
+-  if (IS_ARRAY_BUFFER_DETACH_SUPPORTED == 1) assert(napi_detach_arraybuffer(env, argv[2]) == napi_ok);
+ })

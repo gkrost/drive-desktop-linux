@@ -34,7 +34,7 @@
     "test:coverage": "concurrently \"npm:test:main:coverage\" \"npm:test:renderer:coverage\"",
     "coverage:merge": "lcov-result-merger 'coverage/*/lcov.info' 'coverage/lcov.info'",
     "type-check": "./scripts/tsc-max-errors.sh",
-    "prepare": "husky install",
+    "prepare": "husky install && ts-node scripts/apply-patches.js",
     "generate_schema": "openapi-typescript http://localhost:3005/api-json -o ./src/infra/schemas.d.ts",
     "generate_schema:prod": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/infra/schemas.d.ts",
     "find-deadcode": "knip --max-issues=206"
