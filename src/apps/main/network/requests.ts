@@ -157,20 +157,15 @@ async function replaceMirror(
   excludeNodes: string[] = [],
   opts?: AxiosRequestConfig,
 ): Promise<Mirror> {
-  let mirrorIsOk = false;
-  let mirror: Mirror;
-
-  while (!mirrorIsOk) {
+  while (true) {
     // eslint-disable-next-line no-await-in-loop
     const [newMirror] = await getFileMirrors(networkApiUrl, bucketId, fileId, 1, pointerIndex, excludeNodes, opts);
 
-    mirror = newMirror;
-    mirrorIsOk =
-      newMirror.farmer && newMirror.farmer.nodeID && newMirror.farmer.port && newMirror.farmer.address ? true : false;
+    const farmer = newMirror.farmer;
+    if (farmer && farmer.nodeID && farmer.port && farmer.address) {
+      return newMirror;
+    }
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return mirror!;
 }
 
 function getFileMirrors(

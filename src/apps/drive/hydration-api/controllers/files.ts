@@ -19,7 +19,6 @@ export function buildFilesControllers(container: Container) {
       .map(([key, param]) => {
         return { key, value: param };
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .reduce((partial: Partial<FileAttributes>, { key, value }: { key: string; value: string | string[] }) => {
         return {
           ...partial,
