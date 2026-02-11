@@ -7,12 +7,7 @@ import webpackPaths from './webpack.paths';
 
 // Only packages that were in release/app/package.json should be external
 // These are native modules or runtime dependencies that cannot/should not be bundled
-const nativeExternals = [
-  '@gcas/fuse',
-  'better-sqlite3',
-  'reflect-metadata',
-  'typeorm',
-];
+const nativeExternals = ['@gcas/fuse', 'better-sqlite3', 'reflect-metadata', 'typeorm'];
 
 const configuration: webpack.Configuration = {
   externals: nativeExternals,
@@ -23,13 +18,7 @@ const configuration: webpack.Configuration = {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        exclude: [
-          /node_modules/,
-          /__mocks__/,
-          /__mock__/,
-          /__test-helpers__/,
-          /\.(test|spec)\.[jt]sx?$/,
-        ],
+        exclude: [/node_modules/, /__mocks__/, /__mock__/, /__test-helpers__/, /\.(test|spec)\.[jt]sx?$/],
         use: {
           loader: 'ts-loader',
           options: {
@@ -61,6 +50,9 @@ const configuration: webpack.Configuration = {
     symlinks: false,
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     modules: [webpackPaths.srcPath, 'node_modules'],
+    alias: {
+      '@phosphor-icons/react': '@phosphor-icons/react/dist/index.es.js',
+    },
   },
 
   plugins: [
