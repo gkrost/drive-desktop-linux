@@ -22,6 +22,37 @@ import { updateBackupFolderName } from '../../../infra/drive-server/services/bac
 import { migrateBackupEntryIfNeeded } from './migrate-backup-entry-if-needed';
 import { createBackup } from '../backups/create-backup';
 
+export async function getPathFromDialog(): Promise<{
+  path: string;
+  itemName: string;
+} | null> {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+
+  if (result.canceled) {
+    return null;
+  }
+
+  const chosenPath = result.filePaths[0];
+
+  const itemPath = chosenPath + (chosenPath[chosenPath.length - 1] === path.sep ? '' : path.sep);
+
+  const itemName = path.basename(itemPath);
+
+  return {
+    path: itemPath,
+    itemName,
+  };
+}
+
+export function findBackupPathnameFromId(id: number): string | undefined {
+  const backupsList = configStore.get('backupList');
+  const entryfound = Object.entries(backupsList).find(([, b]) => b.folderId === id);
+
+  return entryfound?.[0];
+}
+
 export type Device = {
   id: number;
   uuid: string;
@@ -30,6 +61,53 @@ export type Device = {
   removed: boolean;
   hasBackups: boolean;
 };
+
+async function downloadDeviceBackupZip(
+  device: Device,
+  path: PathLike,
+  {
+    updateProgress,
+    abortController,
+  }: {
+    updateProgress: (progress: number) => void;
+    abortController?: AbortController;
+  },
+): Promise<void> {
+  if (!device.id) {
+    throw new Error('This backup has not been uploaded yet');
+  }
+
+  const user = getUser();
+  if (!user) {
+    throw new Error('No saved user');
+  }
+
+  const folder = await fetchFolder(device.uuid);
+  if (!folder || !folder.uuid || folder.uuid.length === 0) {
+    throw new Error('No backup data found');
+  }
+
+  const networkApiUrl = process.env.BRIDGE_URL;
+  const bridgeUser = user.bridgeUser;
+  const bridgePass = user.userId;
+  const encryptionKey = configStore.get('mnemonic');
+
+  await downloadFolderAsZip(
+    device.name,
+    networkApiUrl!,
+    folder.uuid,
+    path,
+    {
+      bridgeUser,
+      bridgePass,
+      encryptionKey,
+    },
+    {
+      abortController,
+      updateProgress,
+    },
+  );
+}
 
 export async function getDevices(): Promise<Array<Device>> {
   const response = await driveServerModule.backup.getDevices();
@@ -134,63 +212,16 @@ export async function downloadBackup(device: Device): Promise<void> {
       },
       abortController,
     });
-  } catch (_) {
+  } catch {
     // Try to delete zip if download backup has failed
     try {
       fs.unlinkSync(zipFilePath);
-    } catch (_) {
+    } catch {
       /* noop */
     }
   }
 
   removeListenerIpc.removeListener(listenerName, abortListener);
-}
-
-async function downloadDeviceBackupZip(
-  device: Device,
-  path: PathLike,
-  {
-    updateProgress,
-    abortController,
-  }: {
-    updateProgress: (progress: number) => void;
-    abortController?: AbortController;
-  },
-): Promise<void> {
-  if (!device.id) {
-    throw new Error('This backup has not been uploaded yet');
-  }
-
-  const user = getUser();
-  if (!user) {
-    throw new Error('No saved user');
-  }
-
-  const folder = await fetchFolder(device.uuid);
-  if (!folder || !folder.uuid || folder.uuid.length === 0) {
-    throw new Error('No backup data found');
-  }
-
-  const networkApiUrl = process.env.BRIDGE_URL;
-  const bridgeUser = user.bridgeUser;
-  const bridgePass = user.userId;
-  const encryptionKey = configStore.get('mnemonic');
-
-  await downloadFolderAsZip(
-    device.name,
-    networkApiUrl!,
-    folder.uuid,
-    path,
-    {
-      bridgeUser,
-      bridgePass,
-      encryptionKey,
-    },
-    {
-      abortController,
-      updateProgress,
-    },
-  );
 }
 
 export async function deleteBackup(backup: BackupInfo, isCurrent?: boolean): Promise<void> {
@@ -215,14 +246,14 @@ export async function deleteBackupsFromDevice(device: Device, isCurrent?: boolea
   logger.debug({ tag: 'BACKUPS', msg: '[BACKUPS] Deleting backups from device', count: backups.length });
   logger.debug({ tag: 'BACKUPS', msg: '[BACKUPS] Backups details', backups });
 
-  let deletionPromises: Promise<any>[] = backups.map((backup) => deleteBackup(backup, isCurrent));
+  const deletionPromises: Promise<void>[] = backups.map((backup) => deleteBackup(backup, isCurrent));
   await Promise.all(deletionPromises);
 
   // delete backups that are not in the backup list
   const { tree } = await fetchFolderTree(device.uuid);
   const foldersToDelete = tree.children.filter((folder) => !backups.some((backup) => backup.folderId === folder.id));
-  deletionPromises = foldersToDelete.map((folder) => deleteFolder(folder.id));
-  await Promise.all(deletionPromises);
+  const folderDeletionPromises: Promise<Response>[] = foldersToDelete.map((folder) => deleteFolder(folder.id));
+  await Promise.all(folderDeletionPromises);
 }
 
 export async function disableBackup(backup: BackupInfo): Promise<void> {
@@ -289,13 +320,6 @@ export async function changeBackupPath(currentPath: string): Promise<boolean> {
   return false;
 }
 
-export function findBackupPathnameFromId(id: number): string | undefined {
-  const backupsList = configStore.get('backupList');
-  const entryfound = Object.entries(backupsList).find(([, b]) => b.folderId === id);
-
-  return entryfound?.[0];
-}
-
 export async function createBackupsFromLocalPaths(folderPaths: string[]) {
   configStore.set('backupsEnabled', true);
 
@@ -313,30 +337,6 @@ export type PathInfo = {
   itemName: string;
   isDirectory?: boolean;
 };
-
-export async function getPathFromDialog(): Promise<{
-  path: string;
-  itemName: string;
-} | null> {
-  const result = await dialog.showOpenDialog({
-    properties: ['openDirectory'],
-  });
-
-  if (result.canceled) {
-    return null;
-  }
-
-  const chosenPath = result.filePaths[0];
-
-  const itemPath = chosenPath + (chosenPath[chosenPath.length - 1] === path.sep ? '' : path.sep);
-
-  const itemName = path.basename(itemPath);
-
-  return {
-    path: itemPath,
-    itemName,
-  };
-}
 
 export async function getMultiplePathsFromDialog(allowFiles = false): Promise<PathInfo[] | null> {
   const result = await dialog.showOpenDialog({

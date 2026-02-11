@@ -6,12 +6,14 @@ import { FuseIOError } from './FuseErrors';
 import { logger } from '@internxt/drive-desktop-core/build/backend';
 import { TemporalFileDeleter } from '../../../../context/storage/TemporalFiles/application/deletion/TemporalFileDeleter';
 import { onRelease } from './open-flags-tracker';
+import { TemporalFile } from '../../../../context/storage/TemporalFiles/domain/TemporalFile';
 
 export class ReleaseCallback extends NotifyFuseCallback {
   constructor(private readonly container: Container) {
     super('Release', { debug: false });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async execute(path: string, _fd: unknown) {
     // File descriptor parameter is unused as this is a no-op callback
     onRelease(path);
@@ -30,18 +32,18 @@ export class ReleaseCallback extends NotifyFuseCallback {
     }
   }
 
-  private async findDocument(path: string) {
+  private async findDocument(path: string): Promise<TemporalFile | undefined> {
     return this.container.get(TemporalFileByPathFinder).run(path);
   }
 
-  private async handleDocument(document: any, path: string) {
+  private async handleDocument(document: TemporalFile, path: string) {
     this.logDebugMessage('Offline File found');
     if (document.isAuxiliary()) return this.right();
 
     return await this.uploadDocument(document, path);
   }
 
-  private async uploadDocument(document: any, path: string) {
+  private async uploadDocument(document: TemporalFile, path: string) {
     try {
       await this.container.get(TemporalFileUploader).run(document.path.value);
       this.logDebugMessage('File has been uploaded');

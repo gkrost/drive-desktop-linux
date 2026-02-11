@@ -1,6 +1,6 @@
-export class MapObserver {
+export class MapObserver<K, V> {
   constructor(
-    private readonly mapToObserve: Map<any, any>,
+    private readonly mapToObserve: Map<K, V>,
     private readonly callback: () => void,
     private intervalId: NodeJS.Timeout | null = null,
   ) {}

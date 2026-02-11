@@ -19,10 +19,11 @@ export function buildFilesControllers(container: Container) {
       .map(([key, param]) => {
         return { key, value: param };
       })
-      .reduce((partial: Partial<FileAttributes>, { key, value }: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .reduce((partial: Partial<FileAttributes>, { key, value }: { key: string; value: string | string[] }) => {
         return {
           ...partial,
-          [key]: value.toString(),
+          [key]: Array.isArray(value) ? value.join(',') : value.toString(),
         };
       }, {});
 

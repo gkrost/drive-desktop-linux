@@ -98,7 +98,7 @@ export function createClient<T>(opts: ClientOptions) {
     o?: {
       path?: Record<string, string>;
       headers?: Record<string, string>;
-      query?: Record<string, any>;
+      query?: Record<string, unknown>;
       body?: OperationRequestBody<T, P, M>;
     },
   ): Promise<{ data: OperationResponse<T, P, M> }> {
@@ -128,10 +128,11 @@ export function createClient<T>(opts: ClientOptions) {
   }
 
   return {
-    GET: <P extends PathsWithMethod<T, 'get'>>(p: P, o?: any) => request('get', p, o),
-    POST: <P extends PathsWithMethod<T, 'post'>>(p: P, o?: any) => request('post', p, o),
-    PUT: <P extends PathsWithMethod<T, 'put'>>(p: P, o?: any) => request('put', p, o),
-    PATCH: <P extends PathsWithMethod<T, 'patch'>>(p: P, o?: any) => request('patch', p, o),
-    DELETE: <P extends PathsWithMethod<T, 'delete'>>(p: P, o?: any) => request('delete', p, o),
+    GET: <P extends PathsWithMethod<T, 'get'>>(p: P, o?: Parameters<typeof request>[2]) => request('get', p, o),
+    POST: <P extends PathsWithMethod<T, 'post'>>(p: P, o?: Parameters<typeof request>[2]) => request('post', p, o),
+    PUT: <P extends PathsWithMethod<T, 'put'>>(p: P, o?: Parameters<typeof request>[2]) => request('put', p, o),
+    PATCH: <P extends PathsWithMethod<T, 'patch'>>(p: P, o?: Parameters<typeof request>[2]) => request('patch', p, o),
+    DELETE: <P extends PathsWithMethod<T, 'delete'>>(p: P, o?: Parameters<typeof request>[2]) =>
+      request('delete', p, o),
   };
 }
