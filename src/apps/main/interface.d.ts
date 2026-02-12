@@ -1,16 +1,20 @@
-import { BackupInfo } from './../backups/BackupInfo';
-import { Usage } from '../../backend/features/usage/usage.types';
-import { Result } from './../../context/shared/domain/Result';
-import { UserAvailableProducts } from '@internxt/drive-desktop-core/build/backend';
-import { Device } from './device/service';
+import { BackupInfo } from "./../backups/BackupInfo";
+import { Usage } from "../../backend/features/usage/usage.types";
+import { Result } from "./../../context/shared/domain/Result";
+import { UserAvailableProducts } from "@internxt/drive-desktop-core/build/backend";
+import { Device } from "./device/service";
 import {
   AuthAccessResponseViewModel,
   AuthLoginResponseViewModel,
   LoginAccessRequest,
-} from '../../infra/drive-server/services/auth/auth.types';
-import { TLoggerBody } from '@internxt/drive-desktop-core/build/backend';
-import { CleanerReport, CleanerViewModel, CleanupProgress } from '../../backend/features/cleaner/cleaner.types';
-import { BackupErrorRecord } from '../../backend/features/backup/backup.types';
+} from "../../infra/drive-server/services/auth/auth.types";
+import { TLoggerBody } from "@internxt/drive-desktop-core/build/backend";
+import {
+  CleanerReport,
+  CleanerViewModel,
+  CleanupProgress,
+} from "../../backend/features/cleaner/cleaner.types";
+import { BackupErrorRecord } from "../../backend/features/backup/backup.types";
 
 /** This interface and declare global will replace the preload.d.ts.
  * The thing is that instead of that, we will gradually will be declaring the interface here as we generate tests
@@ -26,11 +30,17 @@ export interface IElectronAPI {
 
   getOrCreateDevice: () => Promise<Result<Device, Error>>;
 
-  getBackupsFromDevice: (device: Device, isCurrent?: boolean) => Promise<Array<BackupInfo>>;
+  getBackupsFromDevice: (
+    device: Device,
+    isCurrent?: boolean,
+  ) => Promise<Array<BackupInfo>>;
 
   addBackup: () => Promise<BackupInfo | undefined>;
 
-  deleteBackupsFromDevice: (device: Device, isCurrent?: boolean) => Promise<void>;
+  deleteBackupsFromDevice: (
+    device: Device,
+    isCurrent?: boolean,
+  ) => Promise<void>;
 
   disableBackup: (backup: BackupInfo) => Promise<void>;
 
@@ -52,7 +62,9 @@ export interface IElectronAPI {
   userAvailableProducts: {
     get: () => Promise<UserAvailableProducts | undefined>;
     subscribe: () => void;
-    onUpdate: (callback: (products: UserAvailableProducts) => void) => () => void;
+    onUpdate: (
+      callback: (products: UserAvailableProducts) => void,
+    ) => () => void;
   };
   login(email: string): Promise<AuthLoginResponseViewModel>;
   access(credentials: LoginAccessRequest): Promise<AuthAccessResponseViewModel>;
@@ -61,19 +73,38 @@ export interface IElectronAPI {
     warn: (rawBody: TLoggerBody) => void;
     error: (rawBody: TLoggerBody) => void;
   };
+  isUserLoggedIn(): Promise<boolean>;
+  onRemoteChanges: (func: (value: any) => void) => () => void;
   getUsage(): Promise<Result<Usage, Error>>;
   cleaner: {
     generateReport: (force?: boolean) => Promise<CleanerReport>;
     startCleanup: (viewModel: CleanerViewModel) => Promise<void>;
     stopCleanup: () => Promise<void>;
-    onCleanupProgress: (callback: (progressData: CleanupProgress) => void) => () => void;
+    onCleanupProgress: (
+      callback: (progressData: CleanupProgress) => void,
+    ) => () => void;
     getDiskSpace: () => Promise<number>;
   };
-  getBackupErrorByFolder(folderId: number): Promise<BackupErrorRecord | undefined>;
+  getBackupErrorByFolder(
+    folderId: number,
+  ): Promise<BackupErrorRecord | undefined>;
   getLastBackupHadIssues(): Promise<boolean>;
-  onBackupFatalErrorsChanged(fn: (backupErrors: Array<BackupErrorRecord>) => void): () => void;
+  onBackupFatalErrorsChanged(
+    fn: (backupErrors: Array<BackupErrorRecord>) => void,
+  ): () => void;
   getBackupFatalErrors(): Promise<Array<BackupErrorRecord>>;
   onBackupProgress(func: (value: number) => void): () => void;
+  onRemoteSyncStatusChange(
+    callback: (
+      status: import("./remote-sync/helpers").RemoteSyncStatus,
+    ) => void,
+  ): () => void;
+  getRemoteSyncStatus(): Promise<
+    import("./remote-sync/helpers").RemoteSyncStatus
+  >;
+  getRemoteSyncWaitStatus(): Promise<{ waiting: boolean; remainingMs: number }>;
+  getTotalFilesSynced(): Promise<number>;
+  getTotalFoldersSynced(): Promise<number>;
   startRemoteSync(): Promise<void>;
 }
 

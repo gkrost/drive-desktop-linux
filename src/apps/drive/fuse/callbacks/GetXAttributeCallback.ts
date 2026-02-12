@@ -1,16 +1,17 @@
-import { FuseCallback, CallbackWithData } from './FuseCallback';
-import { VirtualDrive } from '../../virtual-drive/VirtualDrive';
-import { FuseNoSuchFileOrDirectoryError } from './FuseErrors';
-import { logger } from '@internxt/drive-desktop-core/build/backend';
-import Fuse from 'fuse-native';
+import { FuseCallback, CallbackWithData } from "./FuseCallback";
+import { VirtualDrive } from "../../virtual-drive/VirtualDrive";
+import { FuseNoSuchFileOrDirectoryError } from "./FuseErrors";
+import { logger } from "@internxt/drive-desktop-core/build/backend";
+import * as Fuse from "fuse-native";
 
-const XATTR_SYSTEM_POSIX_ACL_PREFIX = 'system.posix_acl_';
+const XATTR_SYSTEM_POSIX_ACL_PREFIX = "system.posix_acl_";
 
 export class GetXAttributeCallback extends FuseCallback<Buffer> {
   private static readonly ENODATA = Fuse.ENODATA;
+  private static readonly EINVAL = Fuse.EINVAL;
 
   constructor(private readonly drive: VirtualDrive) {
-    super('Get X Attribute', {
+    super("Get X Attribute", {
       input: true,
       elapsedTime: false,
       output: false,
@@ -18,7 +19,7 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
   }
 
   private isRootFolder(path: string): boolean {
-    return path === '/';
+    return path === "/";
   }
 
   private isSystemAclAttribute(name: string): boolean {
@@ -29,17 +30,22 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
     const attrName = String(name);
 
     if (this.isRootFolder(path) && this.isSystemAclAttribute(attrName)) {
-      return this.left(new FuseErrorWithCode(GetXAttributeCallback.ENODATA, `No data available for ${attrName}`));
+      return this.left(
+        new FuseErrorWithCode(
+          GetXAttributeCallback.ENODATA,
+          `No data available for ${attrName}`,
+        ),
+      );
     }
 
     try {
       const isAvailableLocally = await this.drive.isLocallyAvailable(path);
 
       if (isAvailableLocally) {
-        return this.right(Buffer.from('on_local'));
+        return this.right(Buffer.from("on_local"));
       }
 
-      const buff = Buffer.from('on_remote');
+      const buff = Buffer.from("on_remote");
       return this.right(buff);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
@@ -68,6 +74,18 @@ export class GetXAttributeCallback extends FuseCallback<Buffer> {
     }
 
     const data = result.getRight();
+
+    // Validate that data is a Buffer before passing to callback
+    if (!Buffer.isBuffer(data)) {
+      logger.error({
+        msg: `${this.name}: Invalid data type, expected Buffer`,
+        dataType: typeof data,
+        data: data,
+      });
+      const emptyBuffer = Buffer.alloc(0);
+      return callback(GetXAttributeCallback.EINVAL, emptyBuffer);
+    }
+
     callback(FuseCallback.OK, data);
   }
 }

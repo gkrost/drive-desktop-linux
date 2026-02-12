@@ -1,13 +1,13 @@
-import { CheckCircle, XCircle, Clock } from '@phosphor-icons/react';
-import { useEffect, useMemo } from 'react';
-import { SyncStatus } from '../../../../context/desktop/sync/domain/SyncStatus';
-import Spinner from '../../assets/spinner.svg';
-import Button from '../../components/Button';
-import { useTranslationContext } from '../../context/LocalContext';
-import useVirtualDriveStatus from '../../hooks/useVirtualDriveStatus';
-import useSyncStatus from '../../hooks/useSyncStatus';
-import useUsage from '../../hooks/useUsage';
-import { useOnlineStatus } from '../../hooks/useOnlineStatus/useOnlineStatus';
+import { CheckCircle, XCircle, Clock } from "@phosphor-icons/react";
+import { useEffect, useMemo } from "react";
+import { SyncStatus } from "../../../../context/desktop/sync/domain/SyncStatus";
+import Spinner from "../../assets/spinner.svg";
+import Button from "../../components/Button";
+import { useTranslationContext } from "../../context/LocalContext";
+import useVirtualDriveStatus from "../../hooks/useVirtualDriveStatus";
+import useSyncStatus from "../../hooks/useSyncStatus";
+import useUsage from "../../hooks/useUsage";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus/useOnlineStatus";
 
 function formatWaitTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -25,15 +25,21 @@ export default function SyncAction(props: { syncStatus: SyncStatus }) {
   const isOnLine = useOnlineStatus();
   const { usage, status } = useUsage();
   const { virtualDriveStatus } = useVirtualDriveStatus();
-  const { syncStatus, waitStatus } = useSyncStatus();
+  const { syncStatus, waitStatus, syncProgress } = useSyncStatus();
 
-  const isSyncStopped = virtualDriveStatus && syncStatus && syncStatus === 'FAILED';
+  const isSyncStopped =
+    virtualDriveStatus && syncStatus && syncStatus === "FAILED";
   const isWaiting = waitStatus.waiting && isOnLine;
-  const waitTimeText = useMemo(() => formatWaitTime(waitStatus.remainingMs), [waitStatus.remainingMs]);
+  const waitTimeText = useMemo(
+    () => formatWaitTime(waitStatus.remainingMs),
+    [waitStatus.remainingMs],
+  );
 
   const handleOpenUpgrade = async () => {
     try {
-      await window.electron.openUrl('https://drive.internxt.com/preferences?tab=plans'); // HARDCODED: internxt plans page
+      await window.electron.openUrl(
+        "https://drive.internxt.com/preferences?tab=plans",
+      ); // HARDCODED: internxt plans page
     } catch (error) {
       reportError(error);
     }
@@ -41,8 +47,8 @@ export default function SyncAction(props: { syncStatus: SyncStatus }) {
 
   useEffect(() => {
     if (!isOnLine) {
-      new Notification(translate('networkConnectionLost.title'), {
-        body: translate('networkConnectionLost.message'),
+      new Notification(translate("networkConnectionLost.title"), {
+        body: translate("networkConnectionLost.message"),
       });
     }
   }, [isOnLine, translate]);
@@ -60,36 +66,51 @@ export default function SyncAction(props: { syncStatus: SyncStatus }) {
                 <Clock className="h-5 w-5 shrink-0" />
               </div>
               <span className="truncate">
-                {translate('widget.footer.action-description.waiting', { time: waitTimeText })}
+                {translate("widget.footer.action-description.waiting", {
+                  time: waitTimeText,
+                })}
               </span>
             </>
           ) : (
             <>
-              {isOnLine && props.syncStatus === 'FAILED' && (
+              {isOnLine && props.syncStatus === "FAILED" && (
                 <>
                   {/* SYNC FAILED */}
                   <div className="relative z-0 flex w-5 items-center justify-center text-red before:absolute before:-z-1 before:h-3 before:w-3 before:bg-white">
                     <XCircle className="shrink-0" size={22} weight="fill" />
                   </div>
-                  <span className="truncate">{translate('widget.footer.action-description.failed')}</span>
+                  <span className="truncate">
+                    {translate("widget.footer.action-description.failed")}
+                  </span>
                 </>
               )}
-              {isOnLine && props.syncStatus === 'RUNNING' && (
+              {isOnLine && props.syncStatus === "RUNNING" && (
                 <>
                   {/* SYNCING */}
                   <div className="flex w-5 justify-center text-primary">
                     <Spinner className="h-5 w-5 shrink-0 animate-spin" />
                   </div>
-                  <span className="truncate">{translate('widget.footer.action-description.syncing')}</span>
+                  <span className="truncate">
+                    {syncProgress.isSyncing &&
+                    (syncProgress.totalFilesSynced > 0 ||
+                      syncProgress.totalFoldersSynced > 0)
+                      ? `${translate("widget.footer.action-description.syncing")} (${syncProgress.totalFilesSynced} files, ${syncProgress.totalFoldersSynced} folders)`
+                      : translate("widget.footer.action-description.syncing")}
+                  </span>
                 </>
               )}
-              {isOnLine && props.syncStatus === 'STANDBY' && (
+              {isOnLine && props.syncStatus === "STANDBY" && (
                 <>
                   {/* UP TO DATE */}
                   <div className="relative z-0 flex w-5 items-center justify-center text-primary before:absolute before:-z-1 before:h-3 before:w-3 before:bg-white">
                     <CheckCircle className="shrink-0" size={22} weight="fill" />
                   </div>
-                  <span className="truncate">{translate('widget.footer.action-description.updated')}</span>
+                  <span className="truncate">
+                    {syncProgress.totalFilesSynced > 0 ||
+                    syncProgress.totalFoldersSynced > 0
+                      ? `${translate("widget.footer.action-description.updated")} (${syncProgress.totalFilesSynced} files, ${syncProgress.totalFoldersSynced} folders)`
+                      : translate("widget.footer.action-description.updated")}
+                  </span>
                 </>
               )}
             </>
@@ -97,14 +118,16 @@ export default function SyncAction(props: { syncStatus: SyncStatus }) {
         ) : (
           <>
             {/* OFFLINE */}
-            <span className="truncate">{translate('widget.footer.errors.offline')}</span>
+            <span className="truncate">
+              {translate("widget.footer.errors.offline")}
+            </span>
           </>
         )}
       </div>
 
-      {usage && status === 'ready' && usage.offerUpgrade && (
+      {usage && status === "ready" && usage.offerUpgrade && (
         <Button variant="primary" size="sm" onClick={handleOpenUpgrade}>
-          {translate('widget.header.usage.upgrade')}
+          {translate("widget.header.usage.upgrade")}
         </Button>
       )}
     </div>

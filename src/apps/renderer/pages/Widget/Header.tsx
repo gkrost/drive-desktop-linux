@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
-import { FolderSimple, Gear, Globe } from '@phosphor-icons/react';
-import { Menu, Transition } from '@headlessui/react';
-import bytes from 'bytes';
+import { useEffect, useRef, useState } from "react";
+import { FolderSimple, Gear, Globe } from "@phosphor-icons/react";
+import { Menu, Transition } from "@headlessui/react";
+import bytes from "bytes";
 
-import { User } from '../../../main/types';
-import { useTranslationContext } from '../../context/LocalContext';
-import useBackupErrors from '../../hooks/backups/useBackupErrors';
-import useGeneralIssues from '../../hooks/GeneralIssues';
-import useVirtualDriveIssues from '../../hooks/ProcessIssues';
-import useUsage from '../../hooks/useUsage';
+import { User } from "../../../main/types";
+import { useTranslationContext } from "../../context/LocalContext";
+import useBackupErrors from "../../hooks/backups/useBackupErrors";
+import useGeneralIssues from "../../hooks/GeneralIssues";
+import useVirtualDriveIssues from "../../hooks/ProcessIssues";
+import useUsage from "../../hooks/useUsage";
 
 export default function Header() {
   const { translate } = useTranslationContext();
@@ -16,9 +16,10 @@ export default function Header() {
   const { generalIssues } = useGeneralIssues();
   const { backupErrors } = useBackupErrors();
 
-  const numberOfIssues: number = processIssues.length + backupErrors.length + generalIssues.length;
+  const numberOfIssues: number =
+    processIssues.length + backupErrors.length + generalIssues.length;
 
-  const numberOfIssuesDisplay = numberOfIssues > 99 ? '99+' : numberOfIssues;
+  const numberOfIssuesDisplay = numberOfIssues > 99 ? "99+" : numberOfIssues;
 
   /* Electron on MacOS kept focusing the first focusable
   element on start so we had to create a dummy element
@@ -27,13 +28,13 @@ export default function Header() {
   const dummyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (process.env.platform === 'darwin') {
+    if (process.env.platform === "darwin") {
       const listener = () => {
         dummyRef.current?.blur();
-        dummyRef.current?.removeEventListener('focus', listener);
-        dummyRef.current?.setAttribute('tabindex', '-1');
+        dummyRef.current?.removeEventListener("focus", listener);
+        dummyRef.current?.setAttribute("tabindex", "-1");
       };
-      dummyRef.current?.addEventListener('focus', listener);
+      dummyRef.current?.addEventListener("focus", listener);
     }
   }, []);
 
@@ -58,31 +59,37 @@ export default function Header() {
     }, []);
 
     const { usage, status } = useUsage();
-    console.log('usage in header', usage);
-    console.log('status in header', status);
+    console.log("usage in header", usage);
+    console.log("status in header", status);
 
     let displayUsage: string;
 
-    if (status === 'loading') {
-      displayUsage = 'Loading...';
-    } else if (status === 'error') {
-      displayUsage = '';
+    if (status === "loading") {
+      displayUsage = "Loading storage...";
+    } else if (status === "error") {
+      displayUsage = "";
     } else if (usage) {
       displayUsage = `${bytes.format(usage.usageInBytes)} ${translate(
-        'widget.header.usage.of',
-      )} ${usage.isInfinite ? '∞' : bytes.format(usage.limitInBytes)}`;
+        "widget.header.usage.of",
+      )} ${usage.isInfinite ? "∞" : bytes.format(usage.limitInBytes)}`;
     } else {
-      displayUsage = '';
+      displayUsage = "";
     }
-    console.log('displayUsage', displayUsage);
+    console.log("displayUsage", displayUsage);
     return (
-      <div className="flex flex-1 space-x-2.5 truncate" data-automation-id="headerAccountSection">
+      <div
+        className="flex flex-1 space-x-2.5 truncate"
+        data-automation-id="headerAccountSection"
+      >
         <div className="relative z-0 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface text-base font-semibold uppercase text-primary before:absolute before:inset-0 before:-z-1 before:rounded-full before:bg-primary/20 dark:text-white dark:before:bg-primary/75">
-          {`${user?.name.charAt(0) ?? ''}${user?.lastname.charAt(0) ?? ''}`}
+          {`${user?.name.charAt(0) ?? ""}${user?.lastname.charAt(0) ?? ""}`}
         </div>
 
         <div className="flex flex-1 flex-col truncate">
-          <p className="truncate text-sm font-medium text-gray-100" title={user?.email}>
+          <p
+            className="truncate text-sm font-medium text-gray-100"
+            title={user?.email}
+          >
             {user?.email}
           </p>
           <p className="text-xs text-gray-50">{displayUsage}</p>
@@ -105,9 +112,12 @@ export default function Header() {
     return (
       <div
         className={`relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg before:absolute before:-inset-px hover:bg-surface hover:shadow hover:ring-1 hover:ring-gray-20 dark:hover:bg-gray-10 ${
-          active ? 'bg-surface shadow ring-1 ring-gray-20 dark:bg-gray-10' : undefined
-        } ${disabled ? 'pointer-events-none text-gray-40' : undefined}`}
-        onClick={onClick}>
+          active
+            ? "bg-surface shadow ring-1 ring-gray-20 dark:bg-gray-10"
+            : undefined
+        } ${disabled ? "pointer-events-none text-gray-40" : undefined}`}
+        onClick={onClick}
+      >
         {children}
       </div>
     );
@@ -125,11 +135,12 @@ export default function Header() {
     return (
       <button
         className={`w-full cursor-pointer px-4 py-1.5 text-left text-sm text-gray-80 active:bg-gray-10 ${
-          active && 'bg-gray-1 dark:bg-gray-5'
+          active && "bg-gray-1 dark:bg-gray-5"
         }`}
         tabIndex={0}
         onKeyDown={onClick}
-        onClick={onClick}>
+        onClick={onClick}
+      >
         {children}
       </button>
     );
@@ -137,15 +148,20 @@ export default function Header() {
 
   const ItemsSection = () => (
     <div className="flex shrink-0 items-center space-x-0.5 text-gray-80">
-      {process.env.platform === 'darwin' && <div className="h-0 w-0" tabIndex={0} ref={dummyRef} />}
-      <HeaderItemWrapper onClick={() => handleOpenURL('https://drive.internxt.com')}>
-        {' '}
+      {process.env.platform === "darwin" && (
+        <div className="h-0 w-0" tabIndex={0} ref={dummyRef} />
+      )}
+      <HeaderItemWrapper
+        onClick={() => handleOpenURL("https://drive.internxt.com")}
+      >
+        {" "}
         // HARDCODED: internxt main web app
         <Globe size={22} />
       </HeaderItemWrapper>
       <HeaderItemWrapper
         onClick={() => window.electron.openVirtualDriveFolder()}
-        data-automation-id="openVirtualDriveFolder">
+        data-automation-id="openVirtualDriveFolder"
+      >
         <FolderSimple size={22} />
       </HeaderItemWrapper>
 
@@ -165,13 +181,19 @@ export default function Header() {
               leave="transition duration-75 ease-out"
               leaveFrom="transform scale-100 opacity-100"
               leaveTo="transform scale-95 opacity-0"
-              className="relative z-10">
+              className="relative z-10"
+            >
               <Menu.Items className="absolute right-0 top-1 max-w-[288px] origin-top-right whitespace-nowrap rounded-md bg-surface py-1 shadow-xl ring-1 ring-gray-20 focus:outline-none dark:bg-gray-1">
                 <Menu.Item>
                   {({ active }) => (
                     <div>
-                      <DropdownItem active={active} onClick={() => window.electron.openSettingsWindow()}>
-                        <span>{translate('widget.header.dropdown.preferences')}</span>
+                      <DropdownItem
+                        active={active}
+                        onClick={() => window.electron.openSettingsWindow()}
+                      >
+                        <span>
+                          {translate("widget.header.dropdown.preferences")}
+                        </span>
                       </DropdownItem>
                     </div>
                   )}
@@ -182,11 +204,14 @@ export default function Header() {
                       <DropdownItem
                         active={active}
                         onClick={window.electron.openProcessIssuesWindow}
-                        data-automation-id="menuItemIssues">
+                        data-automation-id="menuItemIssues"
+                      >
                         <div className="flex items-center justify-between">
-                          <p>{translate('widget.header.dropdown.issues')}</p>
+                          <p>{translate("widget.header.dropdown.issues")}</p>
                           {numberOfIssues > 0 && (
-                            <p className="text-sm font-medium text-red">{numberOfIssuesDisplay}</p>
+                            <p className="text-sm font-medium text-red">
+                              {numberOfIssuesDisplay}
+                            </p>
                           )}
                         </div>
                       </DropdownItem>
@@ -198,9 +223,14 @@ export default function Header() {
                     <div>
                       <DropdownItem
                         active={active}
-                        onClick={() => handleOpenURL('https://help.internxt.com')} // HARDCODED: internxt help documentation
-                        data-automation-id="menuItemSupport">
-                        <span>{translate('widget.header.dropdown.support')}</span>
+                        onClick={() =>
+                          handleOpenURL("https://help.internxt.com")
+                        } // HARDCODED: internxt help documentation
+                        data-automation-id="menuItemSupport"
+                      >
+                        <span>
+                          {translate("widget.header.dropdown.support")}
+                        </span>
                       </DropdownItem>
                     </div>
                   )}
@@ -211,12 +241,17 @@ export default function Header() {
                       <div>
                         <DropdownItem
                           active={active}
-                          onClick={() => window.electron.openSettingsWindow('CLEANER')}
-                          data-automation-id="menuItemCleaner">
+                          onClick={() =>
+                            window.electron.openSettingsWindow("CLEANER")
+                          }
+                          data-automation-id="menuItemCleaner"
+                        >
                           <div className="flex flex-row items-center justify-end gap-4">
-                            <span>{translate('widget.header.dropdown.cleaner')}</span>
+                            <span>
+                              {translate("widget.header.dropdown.cleaner")}
+                            </span>
                             <div className="flex rounded-full border border-primary bg-primary/5 px-2 py-1 text-primary">
-                              {translate('widget.header.dropdown.new')}
+                              {translate("widget.header.dropdown.new")}
                             </div>
                           </div>
                         </DropdownItem>
@@ -230,8 +265,11 @@ export default function Header() {
                       <DropdownItem
                         active={active}
                         onClick={window.electron.logout}
-                        data-automation-id="menuItemLogout">
-                        <span>{translate('widget.header.dropdown.logout')}</span>
+                        data-automation-id="menuItemLogout"
+                      >
+                        <span>
+                          {translate("widget.header.dropdown.logout")}
+                        </span>
                       </DropdownItem>
                     </div>
                   )}
@@ -239,8 +277,12 @@ export default function Header() {
                 <Menu.Item>
                   {({ active }) => (
                     <div className="border-t border-t-gray-10">
-                      <DropdownItem active={active} onClick={onQuitClick} data-automation-id="menuItemQuit">
-                        <span>{translate('widget.header.dropdown.quit')}</span>
+                      <DropdownItem
+                        active={active}
+                        onClick={onQuitClick}
+                        data-automation-id="menuItemQuit"
+                      >
+                        <span>{translate("widget.header.dropdown.quit")}</span>
                       </DropdownItem>
                     </div>
                   )}
